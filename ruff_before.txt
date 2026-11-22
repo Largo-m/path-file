@@ -1,0 +1,193 @@
+﻿examples\03_backup_documents.py:56:9: SIM102 Use a single `if` statement instead of nested `if` statements
+examples\04_find_duplicates.py:33:13: B007 Loop control variable `hash_val` not used within loop body
+examples\04_find_duplicates.py:39:101: E501 Line too long (102 > 100)
+examples\06_sync_folders.py:36:18: B007 Loop control variable `dest` not used within loop body
+examples\06_sync_folders.py:60:1: E402 Module level import not at top of file
+src\path_file\__init__.py:11:20: F401 `typing.Union` imported but unused
+src\path_file\__init__.py:13:38: F401 `path_file._internal._log.debug` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:13:45: F401 `path_file._internal._log.get_logger` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:13:57: F401 `path_file._internal._log.quiet` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:13:64: F401 `path_file._internal._log.set_verbosity` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:13:79: F401 `path_file._internal._log.verbose` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:15:31: F401 `path_file.archive.create_archive` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:15:47: F401 `path_file.archive.detect_archive_type` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:15:85: F401 `path_file.archive.list_archive` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:34:5: F401 `path_file.hash.find_duplicates` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:36:5: F401 `path_file.hash.hash_files` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:38:5: F401 `path_file.hash.verify_hashes` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:40:32: F401 `path_file.progress.ProgressBar` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:40:45: F401 `path_file.progress.Spinner` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:40:54: F401 `path_file.progress.create_progress` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:40:71: F401 `path_file.progress.terminal_width` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:42:5: F401 `path_file.report.PathflowJSONEncoder` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:43:5: F401 `path_file.report.build_report` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:44:5: F401 `path_file.report.format_entry_table` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:45:5: F401 `path_file.report.format_extension_table` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:46:5: F401 `path_file.report.format_report` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:47:5: F401 `path_file.report.format_size_bucket_table` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:48:5: F401 `path_file.report.format_table` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:49:5: F401 `path_file.report.to_csv` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:50:5: F401 `path_file.report.to_json` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:53:30: F401 `path_file.search.is_text_file` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:53:44: F401 `path_file.search.search_content` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:53:60: F401 `path_file.search.search_regex` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+src\path_file\__init__.py:72:5: F811 Redefinition of unused `extract_archive` from line 15: `extract_archive` redefined here
+src\path_file\__init__.py:81:5: F811 Redefinition of unused `hash_file` from line 35: `hash_file` redefined here
+src\path_file\__init__.py:100:5: F811 Redefinition of unused `verify_hash` from line 37: `verify_hash` redefined here
+src\path_file\__init__.py:142:11: RUF022 `__all__` is not sorted
+src\path_file\_internal\__init__.py:49:11: RUF022 `__all__` is not sorted
+src\path_file\_internal\_iterators.py:91:13: SIM105 Use `contextlib.suppress(OSError, PermissionError)` instead of `try`-`except`-`pass`
+src\path_file\_internal\_iterators.py:147:13: SIM105 Use `contextlib.suppress(OSError, PermissionError)` instead of `try`-`except`-`pass`
+src\path_file\_internal\_iterators.py:210:21: SIM105 Use `contextlib.suppress(OSError, PermissionError)` instead of `try`-`except`-`pass`
+src\path_file\_internal\_iterators.py:263:13: SIM102 Use a single `if` statement instead of nested `if` statements
+src\path_file\_internal\_iterators.py:271:21: SIM105 Use `contextlib.suppress(OSError, PermissionError)` instead of `try`-`except`-`pass`
+src\path_file\_internal\_iterators.py:292:11: F821 Undefined name `Union`
+src\path_file\_internal\_iterators.py:335:20: F821 Undefined name `Union`
+src\path_file\_internal\_iterators.py:347:21: SIM105 Use `contextlib.suppress(OSError, PermissionError)` instead of `try`-`except`-`pass`
+src\path_file\_internal\_parsers.py:26:9: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+src\path_file\_internal\_parsers.py:47:25: F821 Undefined name `Optional`
+src\path_file\_internal\_parsers.py:212:15: F821 Undefined name `Optional`
+src\path_file\_internal\_parsers.py:212:47: F821 Undefined name `Optional`
+src\path_file\_internal\_parsers.py:219:9: SIM103 Return the condition `not (max_size is not None and size > max_size)` directly
+src\path_file\_internal\_parsers.py:227:15: F821 Undefined name `Optional`
+src\path_file\_internal\_parsers.py:227:52: F821 Undefined name `Optional`
+src\path_file\_internal\_parsers.py:234:9: SIM103 Return the condition `not (max_time is not None and dt > max_time)` directly
+src\path_file\_internal\_safety.py:94:11: F821 Undefined name `Union`
+src\path_file\_internal\_safety.py:130:29: F821 Undefined name `Union`
+src\path_file\_internal\_safety.py:153:21: F821 Undefined name `Union`
+src\path_file\_internal\_safety.py:174:13: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+src\path_file\actions.py:439:13: N806 Variable `FO_DELETE` in function should be lowercase
+src\path_file\actions.py:440:13: N806 Variable `FOF_ALLOWUNDO` in function should be lowercase
+src\path_file\actions.py:441:13: N806 Variable `FOF_NOCONFIRMATION` in function should be lowercase
+src\path_file\actions.py:442:13: N806 Variable `FOF_SILENT` in function should be lowercase
+src\path_file\actions.py:443:13: N806 Variable `FOF_NOERRORUI` in function should be lowercase
+src\path_file\actions.py:457:13: N806 Variable `SHFileOperation` in function should be lowercase
+src\path_file\actions.py:469:9: S110 `try`-`except`-`pass` detected, consider logging the exception
+src\path_file\actions.py:510:9: F841 Local variable `fmt` is assigned to but never used
+src\path_file\actions.py:840:1: E402 Module level import not at top of file
+src\path_file\archive.py:388:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+src\path_file\archive.py:393:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+src\path_file\chain.py:163:21: RUF005 Consider `[*self._filters, filter_func]` instead of concatenation
+src\path_file\chain.py:205:9: UP028 Replace `yield` over `for` loop with `yield from`
+src\path_file\chain.py:530:64: F821 Undefined name `Dict`
+src\path_file\chain.py:547:37: F821 Undefined name `Dict`
+src\path_file\cli.py:26:13: SIM105 Use `contextlib.suppress(ValueError, OSError)` instead of `try`-`except`-`pass`
+src\path_file\cli.py:452:5: SIM108 Use ternary operator `dupes = chain.duplicates_by_name() if args.by_name else chain.duplicates_by_hash(args.algorithm)` instead of `if`-`else`-block
+src\path_file\cli.py:470:5: SIM108 Use ternary operator `chain = pf.find(args.path).files() if args.path.is_file() else chain.files()` instead of `if`-`else`-block
+src\path_file\cli.py:501:13: S602 `subprocess` call with `shell=True` identified, security issue
+src\path_file\cli.py:560:5: SIM108 Use ternary operator `chain = chain.dry_run(False) if args.apply else chain.dry_run(True)` instead of `if`-`else`-block
+src\path_file\entries.py:384:101: E501 Line too long (170 > 100)
+src\path_file\entries.py:387:101: E501 Line too long (116 > 100)
+src\path_file\exceptions.py:28:24: SIM212 Use `hint if hint else "Check the path exists and you have read permissions"` instead of `"Check the path exists and you have read permissions" if not hint else hint`
+src\path_file\exceptions.py:42:13: SIM212 Use `hint if hint else "Run with elevated privileges or check file/folder permissions"` instead of `"Run with elevated privileges or check file/folder permissions" if not hint else hint`
+src\path_file\exceptions.py:55:13: SIM212 Use `hint if hint else "Use overwrite=True or remove the existing destination first"` instead of `"Use overwrite=True or remove the existing destination first" if not hint else hint`
+src\path_file\exceptions.py:67:13: SIM212 Use `hint if hint else "Check pattern syntax: use glob patterns (*.txt) or valid regex"` instead of `"Check pattern syntax: use glob patterns (*.txt) or valid regex" if not hint else hint`
+src\path_file\exceptions.py:79:13: SIM212 Use `hint if hint else "Use format like '100B', '1KB', '2.5MB', '1GB' (KB, MB, GB supported)"` instead of `"Use format like '100B', '1KB', '2.5MB', '1GB' (KB, MB, GB supported)" if not hint else hint`
+src\path_file\exceptions.py:93:13: SIM212 Use `hint if hint else "Use format like '7 days', '1h', '30m', '1 week', '2 months'"` instead of `"Use format like '7 days', '1h', '30m', '1 week', '2 months'" if not hint else hint`
+src\path_file\exceptions.py:106:13: SIM212 Use `hint if hint else "Check TOML syntax: ensure [[rule]] sections have valid keys and values"` instead of `"Check TOML syntax: ensure [[rule]] sections have valid keys and values" if not hint else hint`
+src\path_file\exceptions.py:120:13: SIM212 Use `hint if hint else "Use confirm=True to proceed, or dry_run=True to preview"` instead of `"Use confirm=True to proceed, or dry_run=True to preview" if not hint else hint`
+src\path_file\exceptions.py:139:13: SIM212 Use `hint if hint else "Resolve manually or use direction='source_to_dest' to force"` instead of `"Resolve manually or use direction='source_to_dest' to force" if not hint else hint`
+src\path_file\exceptions.py:153:13: SIM212 Use `hint if hint else "Check path exists and is readable; watcher uses polling fallback"` instead of `"Check path exists and is readable; watcher uses polling fallback" if not hint else hint`
+src\path_file\exceptions.py:165:13: SIM212 Use `hint if hint else "Check archive format is supported and file is not corrupted"` instead of `"Check archive format is supported and file is not corrupted" if not hint else hint`
+src\path_file\exceptions.py:177:13: SIM212 Use `hint if hint else "Check file is readable and not locked by another process"` instead of `"Check file is readable and not locked by another process" if not hint else hint`
+src\path_file\hash.py:181:9: B007 Loop control variable `size` not used within loop body
+src\path_file\hash.py:223:9: S112 `try`-`except`-`continue` detected, consider logging the exception
+src\path_file\progress.py:146:9: SIM108 Use ternary operator `filled = int(round(self.width * self.fraction)) if self.total > 0 else self.width` instead of `if`-`else`-block
+src\path_file\progress.py:147:22: RUF046 Value being cast to `int` is already an integer
+src\path_file\progress.py:190:17: SIM105 Use `contextlib.suppress(ValueError, OSError)` instead of `try`-`except`-`pass`
+src\path_file\progress.py:228:14: RUF012 Mutable default value for class attribute
+src\path_file\progress.py:240:20: RUF012 Mutable default value for class attribute
+src\path_file\progress.py:285:13: SIM105 Use `contextlib.suppress(ValueError, OSError)` instead of `try`-`except`-`pass`
+src\path_file\report.py:124:5: F841 Local variable `header_sep` is assigned to but never used
+src\path_file\report.py:304:101: E501 Line too long (115 > 100)
+src\path_file\report.py:307:101: E501 Line too long (178 > 100)
+src\path_file\rules.py:113:9: SIM110 Use `return all(self._check_condition(entry, condition) for condition in self.when)` instead of `for` loop
+src\path_file\rules.py:169:9: SIM116 Use a dictionary instead of consecutive `if` statements
+src\path_file\search.py:369:13: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+src\path_file\sync.py:27:34: RUF013 PEP 484 prohibits implicit `Optional`
+src\path_file\units.py:85:9: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+src\path_file\units.py:244:9: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+src\path_file\utils.py:306:12: S603 `subprocess` call: check for execution of untrusted input
+src\path_file\utils.py:325:12: S602 `subprocess` call with `shell=True` identified, security issue
+src\path_file\utils.py:350:17: SIM105 Use `contextlib.suppress(OSError, PermissionError)` instead of `try`-`except`-`pass`
+src\path_file\utils.py:377:13: SIM105 Use `contextlib.suppress(OSError, PermissionError)` instead of `try`-`except`-`pass`
+src\path_file\utils.py:391:13: SIM105 Use `contextlib.suppress(OSError, PermissionError)` instead of `try`-`except`-`pass`
+src\path_file\utils.py:405:13: SIM105 Use `contextlib.suppress(OSError, PermissionError)` instead of `try`-`except`-`pass`
+src\path_file\watch.py:161:13: SIM102 Use a single `if` statement instead of nested `if` statements
+src\path_file\watch.py:192:9: SIM103 Return the negated condition directly
+src\path_file\watch.py:204:9: SIM102 Use a single `if` statement instead of nested `if` statements
+src\path_file\watch.py:311:1: E402 Module level import not at top of file
+tests\conftest.py:156:50: RUF013 PEP 484 prohibits implicit `Optional`
+tests\test_actions.py:33:9: F841 Local variable `result` is assigned to but never used
+tests\test_archive.py:179:9: F841 Local variable `original_size` is assigned to but never used
+tests\test_cli.py:47:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:56:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:66:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:76:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:87:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:100:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:110:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:126:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:147:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:171:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:186:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:208:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:218:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:232:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:252:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:281:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:298:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:320:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:328:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_cli.py:337:18: S603 `subprocess` call: check for execution of untrusted input
+tests\test_exceptions.py:6:1: F403 `from path_file.exceptions import *` used; unable to detect undefined names
+tests\test_exceptions.py:13:15: F405 `PathflowError` may be undefined, or defined from star imports
+tests\test_exceptions.py:19:15: F405 `PathflowError` may be undefined, or defined from star imports
+tests\test_exceptions.py:24:15: F405 `PathflowError` may be undefined, or defined from star imports
+tests\test_filters.py:8:1: F403 `from path_file.filters import *` used; unable to detect undefined names
+tests\test_filters.py:16:43: F405 `filter_files` may be undefined, or defined from star imports
+tests\test_filters.py:21:43: F405 `filter_dirs` may be undefined, or defined from star imports
+tests\test_filters.py:26:43: F405 `filter_symlinks` may be undefined, or defined from star imports
+tests\test_filters.py:36:43: F405 `filter_extension` may be undefined, or defined from star imports
+tests\test_filters.py:41:43: F405 `filter_extensions` may be undefined, or defined from star imports
+tests\test_filters.py:46:43: F405 `filter_without_extension` may be undefined, or defined from star imports
+tests\test_filters.py:55:43: F405 `filter_larger_than` may be undefined, or defined from star imports
+tests\test_filters.py:60:43: F405 `filter_smaller_than` may be undefined, or defined from star imports
+tests\test_filters.py:65:43: F405 `filter_between_sizes` may be undefined, or defined from star imports
+tests\test_filters.py:70:43: F405 `filter_empty` may be undefined, or defined from star imports
+tests\test_filters.py:75:43: F405 `filter_not_empty` may be undefined, or defined from star imports
+tests\test_filters.py:84:43: F405 `filter_newer_than` may be undefined, or defined from star imports
+tests\test_filters.py:90:43: F405 `filter_older_than` may be undefined, or defined from star imports
+tests\test_filters.py:95:43: F405 `filter_modified_today` may be undefined, or defined from star imports
+tests\test_filters.py:104:43: F405 `filter_name_contains` may be undefined, or defined from star imports
+tests\test_filters.py:109:43: F405 `filter_name_starts_with` may be undefined, or defined from star imports
+tests\test_filters.py:114:43: F405 `filter_name_ends_with` may be undefined, or defined from star imports
+tests\test_filters.py:119:43: F405 `filter_name_matches` may be undefined, or defined from star imports
+tests\test_filters.py:124:43: F405 `filter_in_folder` may be undefined, or defined from star imports
+tests\test_filters.py:133:43: F405 `filter_hidden` may be undefined, or defined from star imports
+tests\test_filters.py:138:43: F405 `filter_visible` may be undefined, or defined from star imports
+tests\test_filters.py:143:43: F405 `filter_readable` may be undefined, or defined from star imports
+tests\test_filters.py:152:14: F405 `filter_extension` may be undefined, or defined from star imports
+tests\test_filters.py:153:14: F405 `filter_larger_than` may be undefined, or defined from star imports
+tests\test_filters.py:154:20: F405 `combine_filters` may be undefined, or defined from star imports
+tests\test_filters.py:160:14: F405 `filter_extension` may be undefined, or defined from star imports
+tests\test_filters.py:161:14: F405 `filter_extension` may be undefined, or defined from star imports
+tests\test_filters.py:162:20: F405 `combine_filters` may be undefined, or defined from star imports
+tests\test_filters.py:168:13: F405 `filter_extension` may be undefined, or defined from star imports
+tests\test_filters.py:169:19: F405 `negate_filter` may be undefined, or defined from star imports
+tests\test_filters.py:179:43: F405 `filter_glob` may be undefined, or defined from star imports
+tests\test_hash.py:68:13: B007 Loop control variable `path` not used within loop body
+tests\test_hash.py:99:9: RUF059 Unpacked variable `hash_val` is never used
+tests\test_hash.py:99:27: RUF015 Prefer `next(iter(dupes.items()))` over single element slice
+tests\test_integration.py:90:9: RUF059 Unpacked variable `hash_val` is never used
+tests\test_integration.py:90:27: RUF015 Prefer `next(iter(dupes.items()))` over single element slice
+tests\test_search.py:61:9: RUF059 Unpacked variable `entry` is never used
+tests\test_search.py:72:9: RUF059 Unpacked variable `entry` is never used
+tests\test_search.py:83:9: RUF059 Unpacked variable `entry` is never used
+tests\test_search.py:115:9: RUF059 Unpacked variable `entry` is never used
+tests\test_search.py:130:9: RUF059 Unpacked variable `entry` is never used
+tests\test_search.py:145:9: RUF059 Unpacked variable `entry` is never used
+tests\test_sync.py:236:14: B017 Do not assert blind exception: `Exception`
+tests\test_utils.py:10:1: F403 `from path_file.utils import *` used; unable to detect undefined names
+Found 191 errors.
+58 unsafe fixes available with `--fix --unsafe-fixes`.

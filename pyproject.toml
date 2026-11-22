@@ -1,0 +1,102 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "path-file"
+version = "0.1.0"
+description = "The elegant file automation library for Python"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Largo-m", email = "Largo-m@users.noreply.github.com"}]
+keywords = ["files", "automation", "pathlib", "shutil", "chainable", "filters", "sync"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Filesystems",
+    "Typing :: Typed",
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+trash = ["send2trash>=1.5"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-xdist>=3.5",
+    "mypy>=1.10",
+    "ruff>=0.5",
+    "black>=24.0",
+    "build>=1.2",
+    "twine>=5.0",
+]
+
+[project.scripts]
+path-file = "path_file.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Largo-m/path_file"
+Documentation = "https://github.com/Largo-m/path_file#readme"
+Repository = "https://github.com/Largo-m/path_file"
+Issues = "https://github.com/Largo-m/path_file/issues"
+Changelog = "https://github.com/Largo-m/path_file/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/path_file"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/path_file", "tests", "README.md", "LICENSE", "CHANGELOG.md"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "RUF", "S"]
+ignore = ["S101"]
+
+[[tool.mypy.overrides]]
+module = ["send2trash.*"]
+ignore_missing_imports = true
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_unimported = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["src/path_file"]
+branch = true
+omit = ["*/tests/*", "*/__main__.py"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@overload",
+]

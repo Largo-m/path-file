@@ -1,0 +1,105 @@
+# path_file Rules Configuration
+# 
+# This file demonstrates the TOML format for path_file rules.
+# Save as path_file.toml and use with:
+#   python -m path_file rules ~/Downloads -f path_file.toml --apply
+
+# Delete temporary files older than 1 day
+[[rule]]
+match = "*.tmp"
+when_older_than = "1 day"
+action = "delete"
+
+# Delete Chrome/Firefox partial downloads
+[[rule]]
+match = "*.crdownload"
+action = "delete"
+
+[[rule]]
+match = "*.part"
+action = "delete"
+
+# Move large images to Pictures/Large
+[[rule]]
+match = "*.jpg"
+when_larger_than = "50MB"
+action = "move"
+dest = "~/Pictures/Large"
+overwrite = false
+
+[[rule]]
+match = "*.png"
+when_larger_than = "50MB"
+action = "move"
+dest = "~/Pictures/Large"
+overwrite = false
+
+# Move old installers to Archives
+[[rule]]
+match = "*.dmg"
+when_older_than = "30 days"
+action = "move"
+dest = "~/Archives/Installers"
+
+[[rule]]
+match = "*.exe"
+when_older_than = "30 days"
+action = "move"
+dest = "~/Archives/Installers"
+
+[[rule]]
+match = "*.msi"
+when_older_than = "30 days"
+action = "move"
+dest = "~/Archives/Installers"
+
+# Archive old logs
+[[rule]]
+match = "*.log"
+when_older_than = "30 days"
+action = "archive"
+dest = "~/Archives/Logs"
+
+# Compress old PDFs
+[[rule]]
+match = "*.pdf"
+when_older_than = "1 year"
+action = "compress"
+
+# Rename screenshots with date
+[[rule]]
+match = "Screenshot*.png"
+action = "rename"
+pattern = "Screenshot_{date:%Y-%m-%d}_{n:03d}{ext}"
+
+# Clean old cache files
+[[rule]]
+match = "*cache*"
+when_older_than = "7 days"
+action = "delete"
+
+# Move archives to Archives folder
+[[rule]]
+match = "*.zip"
+when_older_than = "7 days"
+action = "move"
+dest = "~/Archives/Archives"
+
+[[rule]]
+match = "*.tar.gz"
+when_older_than = "7 days"
+action = "move"
+dest = "~/Archives/Archives"
+
+# Move documents to Documents folder
+[[rule]]
+match = "*.pdf"
+when_older_than = "1 day"
+action = "move"
+dest = "~/Documents"
+
+[[rule]]
+match = "*.docx"
+when_older_than = "1 day"
+action = "move"
+dest = "~/Documents"
