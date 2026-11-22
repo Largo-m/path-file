@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import shutil
 import threading
 from collections.abc import Callable
@@ -53,7 +54,7 @@ def execute_action(chain: FileChain) -> ActionResult:
         return _execute_archive_to(chain, params, pos_args)
 
     # Map action name to executor
-    executors: dict[str, Callable] = {
+    executors: dict[str, Callable[..., Any]] = {
         "copy_to": _action_copy,
         "move_to": _action_move,
         "delete": _action_delete,
@@ -162,18 +163,18 @@ def execute_action(chain: FileChain) -> ActionResult:
 
 
 def _execute_sequential(
-    executor: Callable,
+    executor: Callable[..., Any],
     entries: list[Entry],
-    params: dict,
+    params: dict[str, Any],
     on_error: str,
     dry_run: bool,
     action_name: str,
     progress_bar: Any,
     verbose: bool,
-    pos_args: tuple = (),
+    pos_args: tuple[Any, ...] = (),
 ) -> ActionResult:
     """Execute action sequentially."""
-    errors = []
+    errors: list[tuple[Path, Exception]] = []
     count = 0
     total_size = 0
     skipped = 0
@@ -216,19 +217,19 @@ def _execute_sequential(
 
 
 def _execute_parallel(
-    executor: Callable,
+    executor: Callable[..., Any],
     entries: list[Entry],
-    params: dict,
+    params: dict[str, Any],
     workers: int,
     on_error: str,
     dry_run: bool,
     action_name: str,
     progress_bar: Any,
     verbose: bool,
-    pos_args: tuple = (),
+    pos_args: tuple[Any, ...] = (),
 ) -> ActionResult:
     """Execute action in parallel using thread pool."""
-    errors = []
+    errors: list[tuple[Path, Exception]] = []
     count = 0
     total_size = 0
     skipped = 0
@@ -257,11 +258,12 @@ def _execute_parallel(
                         total_size += size
                 else:
                     with lock:
-                        if on_error == "collect":
-                            errors.append((entry.path, error))
-                        skipped += 1
-                        if on_error == "raise":
-                            raise error
+                        if error is not None:
+                            if on_error == "collect":
+                                errors.append((entry.path, error))
+                            skipped += 1
+                            if on_error == "raise":
+                                raise error
             except Exception as e:
                 if on_error == "raise":
                     raise
@@ -284,7 +286,9 @@ def _execute_parallel(
     )
 
 
-def _execute_archive_to(chain: FileChain, params: dict, pos_args: tuple) -> ActionResult:
+def _execute_archive_to(
+    chain: FileChain, params: dict[str, Any], pos_args: tuple[Any, ...]
+) -> ActionResult:
     """Execute archive_to action - creates single archive from all entries."""
 
     entries = chain._materialize()
@@ -329,7 +333,7 @@ def _action_copy(
     preserve_metadata: bool = True,
     create_dest: bool = True,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Copy file or directory to destination.
 
@@ -368,7 +372,7 @@ def _action_move(
     overwrite: bool = False,
     create_dest: bool = True,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Move file or directory to destination.
 
@@ -394,7 +398,7 @@ def _action_delete(
     entry: Entry,
     dry_run: bool = True,
     confirm: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Delete file or directory (permanent)."""
     if dry_run:
@@ -410,7 +414,7 @@ def _action_trash(
     entry: Entry,
     dry_run: bool = True,
     confirm: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Move file or directory to OS recycle bin/trash."""
     if dry_run:
@@ -488,7 +492,7 @@ def _action_rename(
     entry: Entry,
     pattern: str,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """
     Rename file using pattern.
@@ -506,9 +510,7 @@ def _action_rename(
     new_name = new_name.replace("{date}", datetime.now().strftime("%Y-%m-%d"))
 
     # Handle {n:04d} style
-    import re
-
-    def repl(match):
+    def repl(match: re.Match[str]) -> str:
         # This is a simple implementation - in real use, you'd track counter
         return "0001"  # Placeholder
 
@@ -523,7 +525,7 @@ def _action_rename_with(
     entry: Entry,
     func: Callable[[str], str],
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Rename using a function: func(stem) -> new_stem."""
     if dry_run:
@@ -542,7 +544,7 @@ def _action_archive_to(
     format: str = "zip",
     compression: str = "deflated",
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Add entry to archive."""
     if dry_run:
@@ -557,7 +559,7 @@ def _action_compress(
     entry: Entry,
     format: str = "gz",
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Compress file."""
     if dry_run:
@@ -573,7 +575,7 @@ def _action_extract_to(
     entry: Entry,
     dest: str | Path,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Extract archive to destination."""
     if dry_run:
@@ -589,7 +591,7 @@ def _action_chmod(
     entry: Entry,
     mode: int | str,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Change file permissions."""
     if dry_run:
@@ -604,7 +606,7 @@ def _action_chmod(
 def _action_touch(
     entry: Entry,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Update modification time (create if not exists)."""
     if dry_run:
@@ -617,7 +619,7 @@ def _action_read_text(
     entry: Entry,
     encoding: str = "utf-8",
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> str:
     """Read file as text."""
     return entry.read_text(encoding)
@@ -626,7 +628,7 @@ def _action_read_text(
 def _action_read_bytes(
     entry: Entry,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> bytes:
     """Read file as bytes."""
     return entry.read_bytes()
@@ -637,7 +639,7 @@ def _action_write_text(
     data: str,
     encoding: str = "utf-8",
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Write text to file."""
     if dry_run:
@@ -650,7 +652,7 @@ def _action_write_bytes(
     entry: Entry,
     data: bytes,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Write bytes to file."""
     if dry_run:
@@ -663,7 +665,7 @@ def _action_hash(
     entry: Entry,
     algorithm: str = "sha256",
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> str:
     """Compute file hash."""
     if not entry.is_file:
@@ -683,7 +685,7 @@ def _action_open(
     entry: Entry,
     mode: str = "r",
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> IO[Any]:
     """Open file."""
     if dry_run:
@@ -699,7 +701,7 @@ def _action_create_dir(
     entry: Entry,
     mode: int = 0o755,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Create directory (for dir entries)."""
     if dry_run:
@@ -712,7 +714,7 @@ def _action_symlink_to(
     entry: Entry,
     target: str | Path,
     dry_run: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Create symlink at entry pointing to target."""
     if dry_run:
@@ -727,32 +729,32 @@ def _action_symlink_to(
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def action_copy(chain: FileChain, dest: str | Path, **kwargs) -> FileChain:
+def action_copy(chain: FileChain, dest: str | Path, **kwargs: Any) -> FileChain:
     """Copy all entries to destination directory."""
     return chain._with_config(action_name="copy_to", action_params={"dest": dest, **kwargs})
 
 
-def action_move(chain: FileChain, dest: str | Path, **kwargs) -> FileChain:
+def action_move(chain: FileChain, dest: str | Path, **kwargs: Any) -> FileChain:
     """Move all entries to destination directory."""
     return chain._with_config(action_name="move_to", action_params={"dest": dest, **kwargs})
 
 
-def action_delete(chain: FileChain, **kwargs) -> FileChain:
+def action_delete(chain: FileChain, **kwargs: Any) -> FileChain:
     """Delete all entries."""
     return chain._with_config(action_name="delete", action_params=kwargs)
 
 
-def action_trash(chain: FileChain, **kwargs) -> FileChain:
+def action_trash(chain: FileChain, **kwargs: Any) -> FileChain:
     """Move all entries to trash."""
     return chain._with_config(action_name="trash", action_params=kwargs)
 
 
-def action_rename(chain: FileChain, pattern: str, **kwargs) -> FileChain:
+def action_rename(chain: FileChain, pattern: str, **kwargs: Any) -> FileChain:
     """Rename all entries using pattern."""
     return chain._with_config(action_name="rename", action_params={"pattern": pattern, **kwargs})
 
 
-def action_rename_with(chain: FileChain, func: Callable[[str], str], **kwargs) -> FileChain:
+def action_rename_with(chain: FileChain, func: Callable[[str], str], **kwargs: Any) -> FileChain:
     """Rename all entries using function."""
     return chain._with_config(action_name="rename_with", action_params={"func": func, **kwargs})
 
@@ -762,7 +764,7 @@ def action_archive_to(
     archive_path: str | Path,
     format: str = "zip",
     compression: str = "deflated",
-    **kwargs,
+    **kwargs: Any,
 ) -> FileChain:
     """Archive all entries to a single archive."""
     return chain._with_config(
@@ -776,63 +778,63 @@ def action_archive_to(
     )
 
 
-def action_compress(chain: FileChain, format: str = "gz", **kwargs) -> FileChain:
+def action_compress(chain: FileChain, format: str = "gz", **kwargs: Any) -> FileChain:
     """Compress each entry individually."""
     return chain._with_config(action_name="compress", action_params={"format": format, **kwargs})
 
 
-def action_extract_to(chain: FileChain, dest: str | Path, **kwargs) -> FileChain:
+def action_extract_to(chain: FileChain, dest: str | Path, **kwargs: Any) -> FileChain:
     """Extract all archive entries to destination."""
     return chain._with_config(action_name="extract_to", action_params={"dest": dest, **kwargs})
 
 
-def action_chmod(chain: FileChain, mode: int | str, **kwargs) -> FileChain:
+def action_chmod(chain: FileChain, mode: int | str, **kwargs: Any) -> FileChain:
     """Change permissions of all entries."""
     return chain._with_config(action_name="chmod", action_params={"mode": mode, **kwargs})
 
 
-def action_touch(chain: FileChain, **kwargs) -> FileChain:
+def action_touch(chain: FileChain, **kwargs: Any) -> FileChain:
     """Touch all entries."""
     return chain._with_config(action_name="touch", action_params=kwargs)
 
 
-def action_read_text(chain: FileChain, encoding: str = "utf-8", **kwargs) -> FileChain:
+def action_read_text(chain: FileChain, encoding: str = "utf-8", **kwargs: Any) -> FileChain:
     """Read all entries as text."""
     return chain._with_config(
         action_name="read_text", action_params={"encoding": encoding, **kwargs}
     )
 
 
-def action_read_bytes(chain: FileChain, **kwargs) -> FileChain:
+def action_read_bytes(chain: FileChain, **kwargs: Any) -> FileChain:
     """Read all entries as bytes."""
     return chain._with_config(action_name="read_bytes", action_params=kwargs)
 
 
-def action_write_text(chain: FileChain, data: str, **kwargs) -> FileChain:
+def action_write_text(chain: FileChain, data: str, **kwargs: Any) -> FileChain:
     """Write same data to all entries."""
     return chain._with_config(action_name="write_text", action_params={"data": data, **kwargs})
 
 
-def action_write_bytes(chain: FileChain, data: bytes, **kwargs) -> FileChain:
+def action_write_bytes(chain: FileChain, data: bytes, **kwargs: Any) -> FileChain:
     """Write same bytes to all entries."""
     return chain._with_config(action_name="write_bytes", action_params={"data": data, **kwargs})
 
 
-def action_hash(chain: FileChain, algorithm: str = "sha256", **kwargs) -> FileChain:
+def action_hash(chain: FileChain, algorithm: str = "sha256", **kwargs: Any) -> FileChain:
     """Compute hash for all entries."""
     return chain._with_config(action_name="hash", action_params={"algorithm": algorithm, **kwargs})
 
 
-def action_open(chain: FileChain, mode: str = "r", **kwargs) -> FileChain:
+def action_open(chain: FileChain, mode: str = "r", **kwargs: Any) -> FileChain:
     """Open all entries."""
     return chain._with_config(action_name="open", action_params={"mode": mode, **kwargs})
 
 
-def action_create_dir(chain: FileChain, mode: int = 0o755, **kwargs) -> FileChain:
+def action_create_dir(chain: FileChain, mode: int = 0o755, **kwargs: Any) -> FileChain:
     """Create directories for all entries."""
     return chain._with_config(action_name="create_dir", action_params={"mode": mode, **kwargs})
 
 
-def action_symlink_to(chain: FileChain, target: str | Path, **kwargs) -> FileChain:
+def action_symlink_to(chain: FileChain, target: str | Path, **kwargs: Any) -> FileChain:
     """Create symlinks for all entries pointing to target."""
     return chain._with_config(action_name="symlink_to", action_params={"target": target, **kwargs})

@@ -5,7 +5,7 @@ from __future__ import annotations
 import contextlib
 import os
 import threading
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 from path_file.entries import Entry
@@ -24,7 +24,7 @@ class WalkConfig:
         max_depth: int | None = None,
         min_depth: int = 0,
         ignore_permission_errors: bool = True,
-        on_error: callable | None = None,
+        on_error: Callable[[str, OSError], None] | None = None,
     ) -> None:
         self.follow_symlinks = follow_symlinks
         self.max_depth = max_depth
@@ -117,7 +117,7 @@ def walk_recursive(
 
 
 def _process_entry(
-    entry: os.DirEntry,
+    entry: os.DirEntry[str],
     depth: int,
     config: WalkConfig,
     tracker: SymlinkTracker | None,
@@ -312,11 +312,11 @@ def walk(
         )
 
     if breadth_first:
-        return walk_bfs(root, config)
+        return walk_bfs(Path(root), config)
     elif iterative:
-        return walk_iterative(root, config)
+        return walk_iterative(Path(root), config)
     else:
-        return walk_recursive(root, config)
+        return walk_recursive(Path(root), config)
 
 
 # ──────────────────────────────────────────────────────────────────────────────

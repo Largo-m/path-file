@@ -5,6 +5,7 @@ from __future__ import annotations
 import mmap
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 from path_file._internal._log import get_logger, log_debug
 from path_file._internal._parsers import _compile_regex
@@ -297,7 +298,7 @@ def search_regex(
     encoding: str = "utf-8",
     flags: int = 0,
     max_file_size: int = _MAX_TEXT_FILE_SIZE,
-) -> list[tuple[Entry, list[tuple[int, str]]]]:
+) -> list[tuple[Entry, list[tuple[int, str | tuple[str, ...]]]]]:
     """
     Search for regex pattern in files.
 
@@ -324,7 +325,7 @@ def search_regex(
 
         try:
             content = entry.read_text(encoding)
-            matches = []
+            matches: list[tuple[int, str | tuple[str, ...]]] = []
             for i, line in enumerate(content.splitlines(), 1):
                 for match in compiled.finditer(line):
                     # Return captured groups if any, otherwise full match
@@ -456,8 +457,8 @@ def search_streaming(
 def grep(
     entries: list[Entry],
     pattern: str,
-    **kwargs,
-) -> list[tuple[Entry, list[tuple[int, str]]]]:
+    **kwargs: Any,
+) -> list[tuple[Entry, list[tuple[int, str | tuple[str, ...]]]]]:
     """Alias for search_regex (grep-like)."""
     return search_regex(entries, pattern, **kwargs)
 
@@ -465,7 +466,7 @@ def grep(
 def grep_text(
     entries: list[Entry],
     text: str,
-    **kwargs,
+    **kwargs: Any,
 ) -> list[tuple[Entry, list[int]]]:
     """Alias for search_content."""
     return search_content(entries, text, **kwargs)

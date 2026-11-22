@@ -55,7 +55,7 @@ class Entry:
         self._content_bytes: bytes | None = None
         self._rule_action: str | None = None
         self._rule_dest: str | None = None
-        self._rule_params: dict | None = None
+        self._rule_params: dict[str, Any] | None = None
 
     @classmethod
     def from_path(cls, path: str | Path) -> Entry:

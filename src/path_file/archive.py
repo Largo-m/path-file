@@ -149,6 +149,13 @@ def _create_zip(
                 zf.write(entry.path, arcname)
 
 
+def _tar_add(tf: tarfile.TarFile, entries: list[Entry]) -> None:
+    """Add entries to an open tar file (arcname = entry basename)."""
+    for entry in entries:
+        arcname = str(entry.path.relative_to(entry.path.parent))
+        tf.add(entry.path, arcname=arcname)
+
+
 def _create_tar(
     entries: list[Entry],
     dest: Path,
@@ -156,31 +163,21 @@ def _create_tar(
     level: int,
 ) -> None:
     """Create TAR archive (optionally compressed)."""
-    if format == "tar":
-        mode = "w"
-        compresslevel = None
-    elif format == "tar.gz":
-        mode = "w:gz"
-        compresslevel = level
+    if format == "tar.gz":
+        with tarfile.open(dest, "w:gz", compresslevel=level) as tf:
+            _tar_add(tf, entries)
     elif format == "tar.bz2":
-        mode = "w:bz2"
-        compresslevel = level
+        with tarfile.open(dest, "w:bz2", compresslevel=level) as tf:
+            _tar_add(tf, entries)
     elif format == "tar.xz":
-        mode = "w:xz"
-        compresslevel = None  # lzma doesn't support compresslevel in tarfile
+        # lzma doesn't accept compresslevel in tarfile
+        with tarfile.open(dest, "w:xz") as tf:
+            _tar_add(tf, entries)
+    elif format == "tar":
+        with tarfile.open(dest, "w") as tf:
+            _tar_add(tf, entries)
     else:
         raise ArchiveError(f"Unknown tar format: {format}", str(dest))
-
-    if compresslevel is not None:
-        with tarfile.open(dest, mode, compresslevel=compresslevel) as tf:
-            for entry in entries:
-                arcname = str(entry.path.relative_to(entry.path.parent))
-                tf.add(entry.path, arcname=arcname)
-    else:
-        with tarfile.open(dest, mode) as tf:
-            for entry in entries:
-                arcname = str(entry.path.relative_to(entry.path.parent))
-                tf.add(entry.path, arcname=arcname)
 
 
 # ──────────────────────────────────────────────────────────────────────────────

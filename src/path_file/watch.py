@@ -8,6 +8,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+from types import TracebackType
 
 from path_file._internal._iterators import scan_dir
 from path_file._internal._log import get_logger, log_debug
@@ -74,7 +75,7 @@ class Watcher:
         self._last_event: dict[Path, float] = {}
 
         # State
-        self._snapshot: dict[Path, tuple] = {}  # path -> (size, mtime)
+        self._snapshot: dict[Path, tuple[int, float]] = {}  # path -> (size, mtime)
         self._running = False
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
@@ -137,7 +138,7 @@ class Watcher:
     def _scan(self) -> list[WatchEvent]:
         """Scan for changes and return list of events."""
         events = []
-        current: dict[Path, tuple] = {}
+        current: dict[Path, tuple[int, float]] = {}
 
         try:
             for entry in scan_dir(self.path):
@@ -286,7 +287,12 @@ class Watcher:
         self.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         self.stop()
 
 

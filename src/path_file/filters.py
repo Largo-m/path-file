@@ -538,47 +538,47 @@ def filter_containing_lines(*texts: str, encoding: str = "utf-8") -> FilterFunc:
 # ──────────────────────────────────────────────────────────────────────────────
 
 
+class _ContextFilter:
+    """
+    Callable marker for context-aware (duplicate/unique) filters.
+
+    These filters need the full entry list to work, so per-entry calls always
+    pass through (return True) and the real decision is made by the chain in
+    ``FileChain._materialize()`` based on ``mode``.
+    """
+
+    _needs_context: bool = True
+
+    def __init__(self, mode: str, algorithm: str | None = None) -> None:
+        self.mode = mode
+        self._algorithm = algorithm
+
+    def __call__(self, entry: Entry) -> bool:
+        return True  # marker only; the chain applies the real decision
+
+
 def filter_duplicates_by_hash(algorithm: str = "sha256") -> FilterFunc:
     """Filter: entries that have duplicate content (by hash)."""
-
-    # This filter needs context (all entries) - implemented in chain
-    # Here we just return a placeholder that chain will replace
-    def _filter(entry: Entry) -> bool:
-        return False  # Will be overridden by chain
-
-    _filter._needs_context = True
-    _filter._algorithm = algorithm
-    return _filter
+    # Context-aware filter; the chain applies it against all entries.
+    return _ContextFilter("duplicates_by_hash", algorithm)
 
 
 def filter_unique_by_hash() -> FilterFunc:
     """Filter: entries with unique content (no duplicates)."""
-
-    def _filter(entry: Entry) -> bool:
-        return False  # Will be overridden by chain
-
-    _filter._needs_context = True
-    return _filter
+    # Context-aware filter; the chain applies it against all entries.
+    return _ContextFilter("unique_by_hash")
 
 
 def filter_duplicates_by_name() -> FilterFunc:
     """Filter: entries with duplicate names."""
-
-    def _filter(entry: Entry) -> bool:
-        return False  # Will be overridden by chain
-
-    _filter._needs_context = True
-    return _filter
+    # Context-aware filter; the chain applies it against all entries.
+    return _ContextFilter("duplicates_by_name")
 
 
 def filter_unique_by_name() -> FilterFunc:
     """Filter: entries with unique names."""
-
-    def _filter(entry: Entry) -> bool:
-        return False  # Will be overridden by chain
-
-    _filter._needs_context = True
-    return _filter
+    # Context-aware filter; the chain applies it against all entries.
+    return _ContextFilter("unique_by_name")
 
 
 def filter_same_size_as(path: str | Path) -> FilterFunc:

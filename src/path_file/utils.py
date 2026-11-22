@@ -77,8 +77,8 @@ def free_space(path: str | Path) -> int:
         ctypes.windll.kernel32.GetDiskFreeSpaceExW(str(path), None, None, ctypes.byref(free_bytes))
         return free_bytes.value
     else:
-        stat = os.statvfs(path)
-        return stat.f_bavail * stat.f_frsize
+        # shutil.disk_usage uses os.statvfs(...).f_bavail * f_frsize on POSIX
+        return shutil.disk_usage(path).free
 
 
 def disk_usage(path: str | Path) -> tuple[int, int, int]:
@@ -299,9 +299,9 @@ def run_command(
     cwd: str | Path | None = None,
     capture: bool = True,
     check: bool = True,
-    env: dict | None = None,
+    env: dict[str, str] | None = None,
     timeout: float | None = None,
-) -> subprocess.CompletedProcess:
+) -> subprocess.CompletedProcess[str]:
     """Run command with sensible defaults."""
     # arg-list subprocess execution is the intended public API
     return subprocess.run(  # noqa: S603  # arg-list subprocess is the intended API
@@ -321,7 +321,7 @@ def run_shell(
     capture: bool = True,
     check: bool = True,
     timeout: float | None = None,
-) -> subprocess.CompletedProcess:
+) -> subprocess.CompletedProcess[str]:
     """Run shell command."""
     # shell command strings are the intended public API
     return subprocess.run(  # noqa: S602  # shell command string is the intended API

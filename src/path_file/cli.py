@@ -6,7 +6,12 @@ import argparse
 import contextlib
 import json
 import sys
+from collections.abc import Callable
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from path_file.watch import WatchEvent
 
 import path_file as pf
 from path_file._version import __version__
@@ -37,7 +42,9 @@ def main(argv: list[str] | None = None) -> int:
         pf.quiet()
 
     try:
-        return args.func(args)
+        # Every command handler registered via set_defaults(func=...) is
+        # annotated to return ``int``.
+        return cast(int, args.func(args))
     except DryRunRequiredError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 3
@@ -141,7 +148,7 @@ Examples:
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def _add_find_parser(subparsers, parents) -> None:
+def _add_find_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("find", help="Find files", parents=[parents])
     p.add_argument("path", type=Path, help="Root directory")
     p.add_argument(
@@ -168,7 +175,7 @@ def _add_find_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_find)
 
 
-def _add_report_parser(subparsers, parents) -> None:
+def _add_report_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("report", help="Generate report", parents=[parents])
     p.add_argument("path", type=Path, help="Root directory")
     p.add_argument(
@@ -181,7 +188,7 @@ def _add_report_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_report)
 
 
-def _add_copy_parser(subparsers, parents) -> None:
+def _add_copy_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("copy", help="Copy files", parents=[parents])
     p.add_argument("source", type=Path, help="Source path")
     p.add_argument("dest", type=Path, help="Destination directory")
@@ -193,7 +200,7 @@ def _add_copy_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_copy)
 
 
-def _add_move_parser(subparsers, parents) -> None:
+def _add_move_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("move", help="Move files", parents=[parents])
     p.add_argument("source", type=Path, help="Source path")
     p.add_argument("dest", type=Path, help="Destination directory")
@@ -203,7 +210,7 @@ def _add_move_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_move)
 
 
-def _add_delete_parser(subparsers, parents) -> None:
+def _add_delete_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("delete", help="Delete files", parents=[parents])
     p.add_argument("path", type=Path, help="Path to delete from")
     p.add_argument("-r", "--recursive", action="store_true", default=True)
@@ -216,7 +223,7 @@ def _add_delete_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_delete)
 
 
-def _add_hash_parser(subparsers, parents) -> None:
+def _add_hash_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("hash", help="Compute file hashes", parents=[parents])
     p.add_argument("path", type=Path, help="File or directory")
     p.add_argument(
@@ -226,7 +233,7 @@ def _add_hash_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_hash)
 
 
-def _add_duplicates_parser(subparsers, parents) -> None:
+def _add_duplicates_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("duplicates", help="Find duplicate files", parents=[parents])
     p.add_argument("path", type=Path, help="Directory to scan")
     p.add_argument("-a", "--algorithm", default="sha256")
@@ -235,7 +242,7 @@ def _add_duplicates_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_duplicates)
 
 
-def _add_archive_parser(subparsers, parents) -> None:
+def _add_archive_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("archive", help="Create archive", parents=[parents])
     p.add_argument("path", type=Path, help="Directory or files to archive")
     p.add_argument("-r", "--recursive", action="store_true", default=True)
@@ -246,7 +253,7 @@ def _add_archive_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_archive)
 
 
-def _add_extract_parser(subparsers, parents) -> None:
+def _add_extract_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("extract", help="Extract archive", parents=[parents])
     p.add_argument("archive", type=Path, help="Archive file")
     p.add_argument("-r", "--recursive", action="store_true", default=True)
@@ -254,7 +261,7 @@ def _add_extract_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_extract)
 
 
-def _add_watch_parser(subparsers, parents) -> None:
+def _add_watch_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("watch", help="Watch directory for changes", parents=[parents])
     p.add_argument("path", type=Path, help="Directory to watch")
     p.add_argument("-i", "--interval", type=float, default=1.0, help="Poll interval")
@@ -267,7 +274,7 @@ def _add_watch_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_watch)
 
 
-def _add_sync_parser(subparsers, parents) -> None:
+def _add_sync_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("sync", help="Synchronize directories", parents=[parents])
     p.add_argument("source", type=Path, help="Source directory")
     p.add_argument("dest", type=Path, help="Destination directory")
@@ -289,7 +296,7 @@ def _add_sync_parser(subparsers, parents) -> None:
     p.set_defaults(func=_cmd_sync)
 
 
-def _add_rules_parser(subparsers, parents) -> None:
+def _add_rules_parser(subparsers: Any, parents: argparse.ArgumentParser) -> None:
     p = subparsers.add_parser("rules", help="Apply rules from TOML file", parents=[parents])
     p.add_argument("path", type=Path, help="Directory to apply rules to")
     p.add_argument("-r", "--recursive", action="store_true", default=True)
@@ -303,13 +310,13 @@ def _add_rules_parser(subparsers, parents) -> None:
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def _build_chain(args) -> pf.FileChain:
+def _build_chain(args: argparse.Namespace) -> pf.FileChain:
     """Build FileChain from common find arguments.
 
     Tolerant of different subparsers: uses ``source``/``path`` for the root and
     ``extensions``/``ext`` for extension filters.
     """
-    root = getattr(args, "path", None) or getattr(args, "source", None)
+    root = getattr(args, "path", None) or getattr(args, "source", None) or "."
     chain = pf.find(root)
 
     if not getattr(args, "recursive", True):
@@ -366,7 +373,7 @@ def _build_chain(args) -> pf.FileChain:
     return chain
 
 
-def _cmd_find(args) -> int:
+def _cmd_find(args: argparse.Namespace) -> int:
     chain = _build_chain(args)
 
     if args.json:
@@ -377,7 +384,7 @@ def _cmd_find(args) -> int:
     return 0 if chain.count() > 0 else 4
 
 
-def _cmd_report(args) -> int:
+def _cmd_report(args: argparse.Namespace) -> int:
     chain = pf.find(args.path)
     if not args.recursive:
         chain = chain.recursive(False)
@@ -392,7 +399,7 @@ def _cmd_report(args) -> int:
     return 0
 
 
-def _cmd_copy(args) -> int:
+def _cmd_copy(args: argparse.Namespace) -> int:
     chain = _build_chain(args)
     result = chain.copy_to(
         args.dest, overwrite=args.overwrite, preserve_metadata=args.preserve
@@ -401,14 +408,14 @@ def _cmd_copy(args) -> int:
     return 0 if result.success() else 1
 
 
-def _cmd_move(args) -> int:
+def _cmd_move(args: argparse.Namespace) -> int:
     chain = _build_chain(args)
     result = chain.move_to(args.dest, overwrite=args.overwrite).execute()
     print(result.summary())
     return 0 if result.success() else 1
 
 
-def _cmd_delete(args) -> int:
+def _cmd_delete(args: argparse.Namespace) -> int:
     chain = _build_chain(args)
 
     if args.trash:
@@ -420,7 +427,7 @@ def _cmd_delete(args) -> int:
     return 0 if result.success() else 1
 
 
-def _cmd_hash(args) -> int:
+def _cmd_hash(args: argparse.Namespace) -> int:
     from path_file.utils import hash_file
 
     path = args.path
@@ -442,7 +449,7 @@ def _cmd_hash(args) -> int:
     return 0
 
 
-def _cmd_duplicates(args) -> int:
+def _cmd_duplicates(args: argparse.Namespace) -> int:
     chain = pf.find(args.path)
     if not args.recursive:
         chain = chain.recursive(False)
@@ -461,7 +468,7 @@ def _cmd_duplicates(args) -> int:
     return 0
 
 
-def _cmd_archive(args) -> int:
+def _cmd_archive(args: argparse.Namespace) -> int:
     chain = pf.find(args.path)
     chain = pf.find(args.path).files() if args.path.is_file() else chain.files()
 
@@ -470,14 +477,14 @@ def _cmd_archive(args) -> int:
     return 0 if result.success() else 1
 
 
-def _cmd_extract(args) -> int:
+def _cmd_extract(args: argparse.Namespace) -> int:
     chain = pf.find(args.archive).files()
     result = chain.extract_to(args.output).execute()
     print(result.summary())
     return 0 if result.success() else 1
 
 
-def _cmd_watch(args) -> int:
+def _cmd_watch(args: argparse.Namespace) -> int:
     watcher = pf.watch(args.path, poll_interval=args.interval)
 
     if args.filter:
@@ -486,8 +493,8 @@ def _cmd_watch(args) -> int:
     if args.debounce:
         watcher.debounce(args.debounce)
 
-    def make_callback(cmd_template):
-        def callback(event):
+    def make_callback(cmd_template: str) -> Callable[[WatchEvent], None]:
+        def callback(event: WatchEvent) -> None:
             cmd = cmd_template.replace("{}", str(event.path))
             import subprocess
 
@@ -511,7 +518,7 @@ def _cmd_watch(args) -> int:
     return 0
 
 
-def _cmd_sync(args) -> int:
+def _cmd_sync(args: argparse.Namespace) -> int:
     syncer = pf.sync(args.source, args.dest)
     syncer.direction(args.direction)
     syncer.delete_extras(args.delete_extras)
@@ -542,7 +549,7 @@ def _cmd_sync(args) -> int:
         return 0 if result.success() else 1
 
 
-def _cmd_rules(args) -> int:
+def _cmd_rules(args: argparse.Namespace) -> int:
     rules = pf.Rules.from_file(args.file)
     errors = rules.validate()
     if errors:

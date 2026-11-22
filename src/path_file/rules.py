@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import operator
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -163,7 +164,7 @@ class Rule:
             return False
 
         # Compare
-        comparisons = {
+        comparisons: dict[str, Callable[[Any, Any], bool]] = {
             ">": operator.gt,
             "<": operator.lt,
             ">=": operator.ge,
@@ -382,7 +383,7 @@ def execute_rules(chain: FileChain, rules: Rules, dry_run: bool | None = None) -
     return results
 
 
-def _execute_rule_action(entry: Entry, rule: Rule, dry_run: bool) -> dict:
+def _execute_rule_action(entry: Entry, rule: Rule, dry_run: bool) -> dict[str, Any]:
     """Execute a single rule action on an entry."""
     # This would integrate with actions.py
     # Placeholder for now

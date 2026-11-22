@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from types import TracebackType
 
 # ──────────────────────────────────────────────────────────────────────────────
 # LOGGER SETUP
@@ -98,7 +99,12 @@ class LogContext:
         self.previous_level = get_logger().level
         set_verbosity(self.level)
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         set_verbosity(self.previous_level)
 
 

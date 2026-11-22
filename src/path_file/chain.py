@@ -6,7 +6,7 @@ import csv
 import io
 import json
 from collections.abc import Callable, Iterator, Sequence
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -23,6 +23,59 @@ if TYPE_CHECKING:
     pass
 
 logger = get_logger(__name__)
+
+
+def _as_duration(duration: str | int) -> str | timedelta:
+    """Normalize int durations (seconds) to timedelta (matches parse_duration)."""
+    return timedelta(seconds=duration) if isinstance(duration, int) else duration
+
+
+def _apply_context_filters(entries: list[Entry], filters: list[Any]) -> list[Entry]:
+    """Apply context-aware (duplicate/unique) filters over ALL entries."""
+    markers = dict.fromkeys(getattr(f, "mode", None) for f in filters)
+    for marker in markers:
+        if marker in ("duplicates_by_hash", "unique_by_hash"):
+            entries = _filter_by_hash_groups(
+                entries, keep_duplicates=marker == "duplicates_by_hash"
+            )
+        elif marker in ("duplicates_by_name", "unique_by_name"):
+            entries = _filter_by_name_groups(
+                entries, keep_duplicates=marker == "duplicates_by_name"
+            )
+    return entries
+
+
+def _filter_by_name_groups(entries: list[Entry], *, keep_duplicates: bool) -> list[Entry]:
+    """Keep entries whose name appears more than once (or exactly once)."""
+    counts: dict[str, int] = {}
+    for entry in entries:
+        counts[entry.name] = counts.get(entry.name, 0) + 1
+    if keep_duplicates:
+        return [e for e in entries if counts[e.name] > 1]
+    return [e for e in entries if counts[e.name] == 1]
+
+
+def _filter_by_hash_groups(entries: list[Entry], *, keep_duplicates: bool) -> list[Entry]:
+    """Keep files whose content hash appears more than once (or exactly once)."""
+    files = [e for e in entries if e.is_file]
+    hashes: dict[int, str] = {}
+    for entry in files:
+        try:
+            hashes[id(entry)] = entry.hash_sha256
+        except OSError as exc:
+            log_debug(f"hash failed for {entry.path}: {exc}")
+    counts: dict[str, int] = {}
+    for digest in hashes.values():
+        counts[digest] = counts.get(digest, 0) + 1
+    result = []
+    for entry in files:
+        entry_digest = hashes.get(id(entry))
+        if entry_digest is None:
+            continue
+        group = counts[entry_digest]
+        if (group > 1) if keep_duplicates else (group == 1):
+            result.append(entry)
+    return result
 
 
 def _dedupe_entries(entries: list[Entry]) -> list[Entry]:
@@ -105,7 +158,7 @@ class FileChain:
 
     def __init__(
         self,
-        source: str | Path | Sequence[str | Path] | Iterator[Entry],
+        source: str | Path | Sequence[str | Path] | Sequence[Entry] | Iterator[Entry],
         filters: list[FilterFunc] | None = None,
         sort_key: str | None = None,
         sort_desc: bool = False,
@@ -121,7 +174,7 @@ class FileChain:
         max_depth: int | None = None,
         min_depth: int = 0,
         action_name: str | None = None,
-        action_params: dict | None = None,
+        action_params: dict[str, Any] | None = None,
     ) -> None:
         self._source = source
         self._filters = filters or []
@@ -214,17 +267,18 @@ class FileChain:
                 max_depth=self._max_depth,
                 min_depth=self._min_depth,
             )
-            raw_entries = walk(self._source, config=config)
+            raw_entries: Iterator[Entry] | list[Entry] = walk(self._source, config=config)
         elif isinstance(self._source, Iterator):
             raw_entries = self._source
         else:
             # Assume sequence of paths or entries
-            raw_entries = []
+            collected: list[Entry] = []
             for item in self._source:
                 if isinstance(item, Entry):
-                    raw_entries.append(item)
+                    collected.append(item)
                 else:
-                    raw_entries.append(Entry.from_path(item))
+                    collected.append(Entry.from_path(item))
+            raw_entries = collected
 
         # Apply filters
         for entry in raw_entries:
@@ -247,6 +301,9 @@ class FileChain:
         # Drop same-path duplicates when .deduplicate() was requested
         if any(getattr(f, "_needs_dedup", False) for f in self._filters):
             entries = _dedupe_entries(entries)
+
+        # Apply context-aware duplicate/unique filters over ALL entries
+        entries = _apply_context_filters(entries, self._filters)
 
         # Sort
         if self._sort_key:
@@ -350,25 +407,25 @@ class FileChain:
         """Modified more recently than duration ago."""
         from path_file.filters import filter_newer_than
 
-        return self._with_filter(filter_newer_than(duration))
+        return self._with_filter(filter_newer_than(_as_duration(duration)))
 
     def older_than(self, duration: str | int) -> FileChain:
         """Modified longer ago than duration."""
         from path_file.filters import filter_older_than
 
-        return self._with_filter(filter_older_than(duration))
+        return self._with_filter(filter_older_than(_as_duration(duration)))
 
     def created_newer_than(self, duration: str | int) -> FileChain:
         """Created more recently than duration ago."""
         from path_file.filters import filter_created_newer_than
 
-        return self._with_filter(filter_created_newer_than(duration))
+        return self._with_filter(filter_created_newer_than(_as_duration(duration)))
 
     def created_older_than(self, duration: str | int) -> FileChain:
         """Created longer ago than duration."""
         from path_file.filters import filter_created_older_than
 
-        return self._with_filter(filter_created_older_than(duration))
+        return self._with_filter(filter_created_older_than(_as_duration(duration)))
 
     def modified_between(self, start: str | datetime, end: str | datetime) -> FileChain:
         """Modified between start and end."""
@@ -543,6 +600,12 @@ class FileChain:
 
         return self._with_filter(filter_unique_by_hash())
 
+    def duplicate_content(self, algorithm: str = "sha256") -> FileChain:
+        """Keep only entries whose content (hash) appears more than once."""
+        from path_file.filters import filter_duplicates_by_hash
+
+        return self._with_filter(filter_duplicates_by_hash(algorithm))
+
     def duplicates_by_name(self) -> dict[str, list[Entry]]:
         """
         Find groups of duplicate entries by file name.
@@ -672,7 +735,7 @@ class FileChain:
         """Get all matching paths."""
         return [e.path for e in self._materialize()]
 
-    def to_dict(self) -> list[dict]:
+    def to_dict(self) -> list[dict[str, Any]]:
         """Get all entries as list of dicts."""
         return [e.as_dict() for e in self._materialize()]
 
@@ -867,28 +930,9 @@ class FileChain:
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def _action_method(name: str):
-    """Decorator to create action methods."""
-
-    def decorator(func):
-        def wrapper(self, *args, **kwargs):
-            # Set action and params, return self for chaining
-            chain = self._with_config(action_name=name, action_params=dict(kwargs))
-            # Store args in action_params
-            if args:
-                chain._action_params["_args"] = args
-            return chain
-
-        wrapper.__name__ = name
-        wrapper.__doc__ = func.__doc__
-        return wrapper
-
-    return decorator
-
-
 # We'll add action methods to FileChain dynamically
 # This avoids circular import with actions.py
-def _add_action_methods():
+def _add_action_methods() -> None:
     """Add action methods to FileChain class."""
     from path_file.actions import (
         action_archive_to,
@@ -912,7 +956,7 @@ def _add_action_methods():
         action_write_text,
     )
 
-    actions = {
+    actions: dict[str, Callable[..., Any]] = {
         "copy_to": action_copy,
         "move_to": action_move,
         "delete": action_delete,
@@ -936,8 +980,10 @@ def _add_action_methods():
 
     for name, func in actions.items():
 
-        def make_method(action_name, action_func):
-            def method(self, *args, **kwargs):
+        def make_method(
+            action_name: str, action_func: Callable[..., Any]
+        ) -> Callable[..., FileChain]:
+            def method(self: FileChain, *args: Any, **kwargs: Any) -> FileChain:
                 # Extract dry_run from kwargs to pass to _with_config
                 dry_run = kwargs.pop("dry_run", None)
                 chain = self._with_config(
