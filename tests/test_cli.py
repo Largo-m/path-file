@@ -44,7 +44,7 @@ class TestFindCommand:
     """Test find command."""
 
     def test_find_basic(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "find", str(tmp_tree)],
             capture_output=True,
             text=True,
@@ -53,7 +53,7 @@ class TestFindCommand:
         assert "file1.txt" in result.stdout
 
     def test_find_extension(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "find", str(tmp_tree), "--ext", ".jpg"],
             capture_output=True,
             text=True,
@@ -63,7 +63,7 @@ class TestFindCommand:
         assert "file1.txt" not in result.stdout
 
     def test_find_larger(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "find", str(tmp_tree), "--larger", "1MB"],
             capture_output=True,
             text=True,
@@ -73,7 +73,7 @@ class TestFindCommand:
         assert "large.bin" in result.stdout
 
     def test_find_json(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "find", str(tmp_tree), "--json", "--limit", "2"],
             capture_output=True,
             text=True,
@@ -84,7 +84,7 @@ class TestFindCommand:
         assert len(data) == 2
 
     def test_find_no_results(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "find", str(tmp_tree), "--ext", ".nonexistent"],
             capture_output=True,
             text=True,
@@ -97,7 +97,7 @@ class TestReportCommand:
     """Test report command."""
 
     def test_report_basic(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "report", str(tmp_tree)],
             capture_output=True,
             text=True,
@@ -107,7 +107,7 @@ class TestReportCommand:
         assert "Total Entries" in result.stdout
 
     def test_report_json(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "report", str(tmp_tree), "--json"],
             capture_output=True,
             text=True,
@@ -123,7 +123,7 @@ class TestCopyCommand:
 
     def test_copy_basic(self, tmp_tree: Path, tmp_dir: Path):
         dest = tmp_dir / "copied"
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [
                 sys.executable,
                 "-m",
@@ -144,7 +144,7 @@ class TestCopyCommand:
 
     def test_copy_dry_run(self, tmp_tree: Path, tmp_dir: Path):
         dest = tmp_dir / "copied_dry"
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [
                 sys.executable,
                 "-m",
@@ -168,7 +168,7 @@ class TestDeleteCommand:
     """Test delete command."""
 
     def test_delete_requires_confirm(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "delete", str(tmp_tree), "--ext", ".txt"],
             capture_output=True,
             text=True,
@@ -183,7 +183,7 @@ class TestDeleteCommand:
         (test_dir / "a.txt").write_text("a")
         (test_dir / "b.txt").write_text("b")
 
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [
                 sys.executable,
                 "-m",
@@ -205,7 +205,7 @@ class TestHashCommand:
     """Test hash command."""
 
     def test_hash_basic(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "hash", str(tmp_tree / "file1.txt")],
             capture_output=True,
             text=True,
@@ -215,7 +215,7 @@ class TestHashCommand:
         assert len(result.stdout.strip().split()[0]) == 64
 
     def test_hash_algorithm(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "hash", str(tmp_tree / "file1.txt"), "-a", "md5"],
             capture_output=True,
             text=True,
@@ -229,7 +229,7 @@ class TestArchiveCommand:
 
     def test_archive_zip(self, tmp_tree: Path, tmp_dir: Path):
         output = tmp_dir / "test.zip"
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [
                 sys.executable,
                 "-m",
@@ -249,7 +249,7 @@ class TestArchiveCommand:
 
     def test_archive_tar_gz(self, tmp_tree: Path, tmp_dir: Path):
         output = tmp_dir / "test.tar.gz"
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [
                 sys.executable,
                 "-m",
@@ -278,7 +278,7 @@ class TestSyncCommand:
         dest.mkdir()
         (src / "new.txt").write_text("new")
 
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "sync", str(src), str(dest), "--dry-run"],
             capture_output=True,
             text=True,
@@ -295,7 +295,7 @@ class TestSyncCommand:
         (dest / "keep.txt").write_text("keep")
         (dest / "extra.txt").write_text("extra")
 
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [
                 sys.executable,
                 "-m",
@@ -317,7 +317,7 @@ class TestGlobalFlags:
     """Test global flags."""
 
     def test_verbose(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "-v", "find", str(tmp_tree), "--limit", "1"],
             capture_output=True,
             text=True,
@@ -325,7 +325,7 @@ class TestGlobalFlags:
         assert result.returncode == 0
 
     def test_quiet(self, tmp_tree: Path):
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [sys.executable, "-m", "path_file", "-q", "find", str(tmp_tree), "--limit", "1"],
             capture_output=True,
             text=True,
@@ -334,7 +334,7 @@ class TestGlobalFlags:
 
     def test_dry_run_global(self, tmp_tree: Path, tmp_dir: Path):
         dest = tmp_dir / "global_dry"
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603  # fixed argv under test
             [
                 sys.executable,
                 "-m",

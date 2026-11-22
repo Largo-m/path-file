@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import threading
 from collections.abc import Iterator
@@ -88,10 +89,8 @@ def walk_recursive(
     # Single file as root: yield it directly
     if root.is_file():
         if _depth >= config.min_depth:
-            try:
+            with contextlib.suppress(OSError, PermissionError):
                 yield Entry.from_path(root)
-            except (OSError, PermissionError):
-                pass
         return
 
     if config.max_depth is not None and _depth > config.max_depth:
@@ -144,10 +143,8 @@ def _process_entry(
             yield Entry.from_stat(path, entry.stat(follow_symlinks=False))
         except (OSError, PermissionError):
             # Fallback to basic Entry
-            try:
+            with contextlib.suppress(OSError, PermissionError):
                 yield Entry.from_path(path)
-            except (OSError, PermissionError):
-                pass  # Skip unreadable entries
 
     # Recurse into subdirectories
     if entry.is_dir(follow_symlinks=False):
@@ -207,10 +204,8 @@ def walk_iterative(
                 try:
                     yield Entry.from_stat(path, entry.stat(follow_symlinks=False))
                 except (OSError, PermissionError):
-                    try:
+                    with contextlib.suppress(OSError, PermissionError):
                         yield Entry.from_path(path)
-                    except (OSError, PermissionError):
-                        pass
 
             if entry.is_dir(follow_symlinks=False):
                 if is_symlink and not config.follow_symlinks:
@@ -260,18 +255,15 @@ def walk_bfs(
             path = Path(entry.path)
             is_symlink = entry.is_symlink()
 
-            if is_symlink and config.follow_symlinks:
-                if tracker and not tracker.visit(path):
-                    continue
+            if is_symlink and config.follow_symlinks and tracker and not tracker.visit(path):
+                continue
 
             if depth >= config.min_depth:
                 try:
                     yield Entry.from_stat(path, entry.stat(follow_symlinks=False))
                 except (OSError, PermissionError):
-                    try:
+                    with contextlib.suppress(OSError, PermissionError):
                         yield Entry.from_path(path)
-                    except (OSError, PermissionError):
-                        pass
 
         # Then queue subdirectories for next level
         for entry in entries:
@@ -289,7 +281,7 @@ def walk_bfs(
 
 
 def walk(
-    root: Union[str, Path],
+    root: str | Path,
     follow_symlinks: bool = False,
     max_depth: int | None = None,
     min_depth: int = 0,
@@ -332,7 +324,7 @@ def walk(
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def scan_dir(path: Union[str, Path]) -> Iterator[Entry]:
+def scan_dir(path: str | Path) -> Iterator[Entry]:
     """
     Fast non-recursive scan of a single directory.
     Uses os.scandir directly, no recursion.
@@ -344,9 +336,7 @@ def scan_dir(path: Union[str, Path]) -> Iterator[Entry]:
                 try:
                     yield Entry.from_stat(Path(entry.path), entry.stat(follow_symlinks=False))
                 except (OSError, PermissionError):
-                    try:
+                    with contextlib.suppress(OSError, PermissionError):
                         yield Entry.from_path(entry.path)
-                    except (OSError, PermissionError):
-                        pass
     except (PermissionError, OSError):
         return  # Silently return empty iterator

@@ -385,14 +385,12 @@ def compress_file(
     format = format.lower()
     if format == "gz":
         out_path = path.with_suffix(path.suffix + ".gz")
-        with path.open("rb") as f_in:
-            with gzip.open(out_path, "wb", compresslevel=level) as f_out:
-                shutil.copyfileobj(f_in, f_out)
+        with path.open("rb") as f_in, gzip.open(out_path, "wb", compresslevel=level) as f_out:
+            shutil.copyfileobj(f_in, f_out)
     elif format == "bz2":
         out_path = path.with_suffix(path.suffix + ".bz2")
-        with path.open("rb") as f_in:
-            with bz2.open(out_path, "wb", compresslevel=level) as f_out:
-                shutil.copyfileobj(f_in, f_out)
+        with path.open("rb") as f_in, bz2.open(out_path, "wb", compresslevel=level) as f_out:
+            shutil.copyfileobj(f_in, f_out)
     elif format == "xz":
         out_path = path.with_suffix(path.suffix + ".xz")
         with path.open("rb") as f_in, lzma.open(out_path, "wb", preset=level) as f_out:

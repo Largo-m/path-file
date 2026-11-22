@@ -153,7 +153,7 @@ dest = "~/Archives/Logs"
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def assert_action_result(result, expected_count: int = None, success: bool = True):
+def assert_action_result(result, expected_count: int | None = None, success: bool = True):
     """Assert ActionResult properties."""
     if expected_count is not None:
         assert result.count == expected_count

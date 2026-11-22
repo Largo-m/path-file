@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import path_file as pf
-from path_file.exceptions import *
+from path_file.exceptions import PathflowError
 
 
 class TestPathflowError:

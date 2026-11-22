@@ -303,7 +303,8 @@ def run_command(
     timeout: float | None = None,
 ) -> subprocess.CompletedProcess:
     """Run command with sensible defaults."""
-    return subprocess.run(
+    # arg-list subprocess execution is the intended public API
+    return subprocess.run(  # noqa: S603  # arg-list subprocess is the intended API
         cmd,
         cwd=cwd,
         capture_output=capture,
@@ -322,7 +323,8 @@ def run_shell(
     timeout: float | None = None,
 ) -> subprocess.CompletedProcess:
     """Run shell command."""
-    return subprocess.run(
+    # shell command strings are the intended public API
+    return subprocess.run(  # noqa: S602  # shell command string is the intended API
         cmd,
         shell=True,
         cwd=cwd,
@@ -347,10 +349,8 @@ def get_size(path: str | Path) -> int:
         total = 0
         for entry in path.rglob("*"):
             if entry.is_file():
-                try:
+                with contextlib.suppress(OSError, PermissionError):
                     total += entry.stat().st_size
-                except (OSError, PermissionError):
-                    pass
         return total
     return 0
 
@@ -374,10 +374,8 @@ def find_largest(path: str | Path, n: int = 10) -> list[Path]:
     files = []
     for entry in path.rglob("*"):
         if entry.is_file():
-            try:
+            with contextlib.suppress(OSError, PermissionError):
                 files.append((entry, entry.stat().st_size))
-            except (OSError, PermissionError):
-                pass
     files.sort(key=lambda x: -x[1])
     return [f[0] for f in files[:n]]
 
@@ -388,10 +386,8 @@ def find_oldest(path: str | Path, n: int = 10) -> list[Path]:
     files = []
     for entry in path.rglob("*"):
         if entry.is_file():
-            try:
+            with contextlib.suppress(OSError, PermissionError):
                 files.append((entry, entry.stat().st_mtime))
-            except (OSError, PermissionError):
-                pass
     files.sort(key=lambda x: x[1])
     return [f[0] for f in files[:n]]
 
@@ -402,10 +398,8 @@ def find_newest(path: str | Path, n: int = 10) -> list[Path]:
     files = []
     for entry in path.rglob("*"):
         if entry.is_file():
-            try:
+            with contextlib.suppress(OSError, PermissionError):
                 files.append((entry, entry.stat().st_mtime))
-            except (OSError, PermissionError):
-                pass
     files.sort(key=lambda x: -x[1])
     return [f[0] for f in files[:n]]
 

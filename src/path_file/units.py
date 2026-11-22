@@ -82,7 +82,7 @@ def parse_size(size: str | int | float) -> int:
     try:
         value = float(value_str)
     except ValueError:
-        raise InvalidSizeError(size, f"Invalid number: {value_str}")
+        raise InvalidSizeError(size, f"Invalid number: {value_str}") from None
 
     if value < 0:
         raise InvalidSizeError(size, "Size cannot be negative")
@@ -241,7 +241,7 @@ def parse_duration(duration: str | int | float | timedelta) -> timedelta:
     try:
         value = float(value_str)
     except ValueError:
-        raise InvalidDurationError(duration, f"Invalid number: {value_str}")
+        raise InvalidDurationError(duration, f"Invalid number: {value_str}") from None
 
     if value < 0:
         raise InvalidDurationError(duration, "Duration cannot be negative")

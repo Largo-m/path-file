@@ -381,10 +381,13 @@ class Report:
         lines.append("│                      PATHFLOW REPORT                       │")
         lines.append("├────────────────────────────────────────────────────────────┤")
         lines.append(
-            f"│ Files: {self.file_count:<5}  Dirs: {self.dir_count:<5}  Symlinks: {self.symlink_count:<5}  Hidden: {self.hidden_count:<5}  Empty: {self.empty_count:<5} │"
+            f"│ Files: {self.file_count:<5}  Dirs: {self.dir_count:<5}  "
+            f"Symlinks: {self.symlink_count:<5}  Hidden: {self.hidden_count:<5}  "
+            f"Empty: {self.empty_count:<5} │"
         )
         lines.append(
-            f"│ Total Entries: {self.chain_size:<5}  Total Size: {human_size(self.total_size):>10}                │"
+            f"│ Total Entries: {self.chain_size:<5}  Total Size: "
+            f"{human_size(self.total_size):>10}                │"
         )
         lines.append("├──────────────────┬──────────┬──────────────────────────────┤")
         lines.append("│ Extension        │ Count    │ Size                         │")

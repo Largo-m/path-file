@@ -30,13 +30,14 @@ def main():
     print(f"\n📊 Found {len(dupes)} duplicate groups:")
 
     total_wasted = 0
-    for i, (hash_val, entries) in enumerate(dupes.items(), 1):
+    for i, (_hash_val, entries) in enumerate(dupes.items(), 1):
         size = entries[0].size
         wasted = size * (len(entries) - 1)
         total_wasted += wasted
 
         print(
-            f"\n  Group {i} ({len(entries)} files, {pf.hsize(size)} each, {pf.hsize(wasted)} wasted):"
+            f"\n  Group {i} ({len(entries)} files, {pf.hsize(size)} each, "
+            f"{pf.hsize(wasted)} wasted):"
         )
         for e in entries:
             print(f"    {e.path}")

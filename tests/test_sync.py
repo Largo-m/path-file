@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from path_file.exceptions import SyncConflictError
 from path_file.sync import IgnoreMatcher, sync
 
 
@@ -233,7 +234,7 @@ class TestSyncerConflictResolution:
 
         syncer = sync(src, dest).direction("bidirectional").conflict_strategy("error")
 
-        with pytest.raises(Exception):
+        with pytest.raises(SyncConflictError):
             syncer.execute()
 
     def test_conflict_source_wins(self, tmp_dir: Path):

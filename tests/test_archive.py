@@ -181,6 +181,7 @@ class TestCompressDecompress:
         compressed = compress_file(src, "gz", keep_original=True)
 
         assert src.exists()
+        assert src.stat().st_size == original_size
         assert compressed.exists()
 
     def test_decompress_gz(self, tmp_tree: Path, tmp_dir: Path):

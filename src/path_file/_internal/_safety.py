@@ -91,7 +91,7 @@ def require_confirm_or_dry_run(
 
 
 def validate_dest(
-    dest: Union[str, Path],
+    dest: str | Path,
     create: bool = True,
     overwrite: bool = False,
 ) -> Path:
@@ -127,7 +127,7 @@ def validate_dest(
     return dest
 
 
-def validate_source(source: Union[str, Path]) -> Path:
+def validate_source(source: str | Path) -> Path:
     """
     Validate source path exists.
 
@@ -150,7 +150,7 @@ def validate_source(source: Union[str, Path]) -> Path:
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def safe_path(path: Union[str, Path], base: Path | None = None) -> Path:
+def safe_path(path: str | Path, base: Path | None = None) -> Path:
     """
     Resolve and validate path for safety.
 
@@ -174,7 +174,7 @@ def safe_path(path: Union[str, Path], base: Path | None = None) -> Path:
             raise PathflowError(
                 f"Path {path} escapes base directory {base}",
                 "Operation not allowed: path traversal detected",
-            )
+            ) from None
 
     return path
 

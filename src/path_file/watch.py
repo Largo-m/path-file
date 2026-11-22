@@ -158,10 +158,9 @@ class Watcher:
             elif old is not None and new is None:
                 # Deleted
                 events.append(WatchEvent("deleted", path))
-            elif old is not None and new is not None:
+            elif old is not None and new is not None and (old[0] != new[0] or old[1] != new[1]):
                 # Check for modification
-                if old[0] != new[0] or old[1] != new[1]:
-                    events.append(WatchEvent("modified", path, entry=Entry.from_path(path)))
+                events.append(WatchEvent("modified", path, entry=Entry.from_path(path)))
 
         # Apply filters (name glob / entry predicate)
         events = [e for e in events if self._filter_event(e)]
@@ -189,9 +188,7 @@ class Watcher:
         """Apply filters to event."""
         if self._name_filter and not self._name_filter(event.path.name):
             return False
-        if self._entry_filter and event.entry and not self._entry_filter(event.entry):
-            return False
-        return True
+        return not (self._entry_filter and event.entry and not self._entry_filter(event.entry))
 
     def _debounce_event(self, event: WatchEvent) -> bool:
         """Check if event should be debounced."""
@@ -201,9 +198,8 @@ class Watcher:
         now = time.time()
         key = event.path
 
-        if key in self._last_event:
-            if now - self._last_event[key] < self._debounce_seconds:
-                return True
+        if key in self._last_event and now - self._last_event[key] < self._debounce_seconds:
+            return True
 
         self._last_event[key] = now
         return False
@@ -306,6 +302,3 @@ def watch(
 ) -> Watcher:
     """Create a new Watcher."""
     return Watcher(path, poll_interval, recursive)
-
-
-from dataclasses import field

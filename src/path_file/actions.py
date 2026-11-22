@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import shutil
+import threading
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
@@ -436,11 +437,12 @@ def _move_to_trash_fallback(path: Path) -> None:
             import ctypes
             from ctypes import wintypes
 
-            FO_DELETE = 3
-            FOF_ALLOWUNDO = 0x40
-            FOF_NOCONFIRMATION = 0x10
-            FOF_SILENT = 0x4
-            FOF_NOERRORUI = 0x400
+            # Win32 SHFileOperation flag values (kept uppercase-free per PEP 8)
+            fo_delete = 3
+            fof_allowundo = 0x40
+            fof_noconfirmation = 0x10
+            fof_silent = 0x4
+            fof_noerrorui = 0x400
 
             class SHFILEOPSTRUCT(ctypes.Structure):
                 _fields_ = [
@@ -454,20 +456,20 @@ def _move_to_trash_fallback(path: Path) -> None:
                     ("lpszProgressTitle", wintypes.LPCWSTR),
                 ]
 
-            SHFileOperation = ctypes.windll.shell32.SHFileOperationW
-            SHFileOperation.argtypes = [ctypes.POINTER(SHFILEOPSTRUCT)]
-            SHFileOperation.restype = wintypes.INT
+            sh_file_operation = ctypes.windll.shell32.SHFileOperationW
+            sh_file_operation.argtypes = [ctypes.POINTER(SHFILEOPSTRUCT)]
+            sh_file_operation.restype = wintypes.INT
 
             op = SHFILEOPSTRUCT()
-            op.wFunc = FO_DELETE
+            op.wFunc = fo_delete
             op.pFrom = str(path.resolve()) + "\0\0"
-            op.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT | FOF_NOERRORUI
-            result = SHFileOperation(ctypes.byref(op))
+            op.fFlags = fof_allowundo | fof_noconfirmation | fof_silent | fof_noerrorui
+            result = sh_file_operation(ctypes.byref(op))
             if result != 0:
                 raise OSError(f"SHFileOperation failed with code {result}")
             return
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("Recycle bin via SHFileOperation unavailable: %s", exc)
 
     # Linux/macOS fallback: ~/.local/share/Trash
     trash_dir = Path.home() / ".local" / "share" / "Trash" / "files"
@@ -507,7 +509,6 @@ def _action_rename(
     import re
 
     def repl(match):
-        fmt = match.group(1) if match.group(1) else "d"
         # This is a simple implementation - in real use, you'd track counter
         return "0001"  # Placeholder
 
@@ -835,6 +836,3 @@ def action_create_dir(chain: FileChain, mode: int = 0o755, **kwargs) -> FileChai
 def action_symlink_to(chain: FileChain, target: str | Path, **kwargs) -> FileChain:
     """Create symlinks for all entries pointing to target."""
     return chain._with_config(action_name="symlink_to", action_params={"target": target, **kwargs})
-
-
-import threading

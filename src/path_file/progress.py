@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import contextlib
 import shutil
 import sys
 import time
-from typing import IO
+from typing import IO, ClassVar
 
 # ──────────────────────────────────────────────────────────────────────────────
 # TERMINAL HELPERS
@@ -143,10 +144,7 @@ class ProgressBar:
             return ""
         self._last_render = now
 
-        if self.total > 0:
-            filled = int(round(self.width * self.fraction))
-        else:
-            filled = self.width
+        filled = round(self.width * self.fraction) if self.total > 0 else self.width
         bar = self._filled * filled + self._empty * max(0, self.width - filled)
 
         parts = [self.prefix, bar]
@@ -187,10 +185,8 @@ class ProgressBar:
             _safe_write(self.stream, "\r" + line.ljust(terminal_width() - 1) + "\n")
             flush = getattr(self.stream, "flush", None)
             if flush is not None:
-                try:
+                with contextlib.suppress(ValueError, OSError):
                     flush()
-                except (ValueError, OSError):
-                    pass
         self._closed = True
 
     # ─── Context Manager ──────────────────────────────────────────────────────
@@ -225,7 +221,7 @@ class Spinner:
         ...     do_something_slow()
     """
 
-    FRAMES = [
+    FRAMES: ClassVar[list[str]] = [
         "\u280b",
         "\u2819",
         "\u2839",
@@ -237,7 +233,7 @@ class Spinner:
         "\u2807",
         "\u280f",
     ]
-    FRAMES_ASCII = ["|", "/", "-", "\\"]
+    FRAMES_ASCII: ClassVar[list[str]] = ["|", "/", "-", "\\"]
 
     def __init__(
         self,
@@ -282,10 +278,8 @@ class Spinner:
         _safe_write(self.stream, "\r" + " " * (terminal_width() - 1) + "\r")
         flush = getattr(self.stream, "flush", None)
         if flush is not None:
-            try:
+            with contextlib.suppress(ValueError, OSError):
                 flush()
-            except (ValueError, OSError):
-                pass
         self._closed = True
 
     # ─── Context Manager ──────────────────────────────────────────────────────

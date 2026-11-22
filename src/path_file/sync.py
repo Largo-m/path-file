@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 class IgnoreMatcher:
     """Gitignore-style pattern matcher."""
 
-    def __init__(self, patterns: list[str] = None) -> None:
+    def __init__(self, patterns: list[str] | None = None) -> None:
         self.patterns: list[tuple[bool, str]] = []  # (negate, pattern)
         if patterns:
             for p in patterns:

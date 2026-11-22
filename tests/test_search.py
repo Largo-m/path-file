@@ -58,7 +58,7 @@ class TestSearchContent:
         results = search_content(entries, "hello", case_sensitive=False)
 
         assert len(results) == 1
-        entry, lines = results[0]
+        _entry, lines = results[0]
         assert set(lines) == {1, 2}
 
     def test_search_case_sensitive(self, sample_files: Path):
@@ -69,7 +69,7 @@ class TestSearchContent:
         results = search_content(entries, "HELLO", case_sensitive=True)
 
         assert len(results) == 1
-        entry, lines = results[0]
+        _entry, lines = results[0]
         assert lines == [1]
 
     def test_search_multiple_matches(self, sample_files: Path):
@@ -80,7 +80,7 @@ class TestSearchContent:
         results = search_content(entries, "foo")
 
         assert len(results) == 1
-        entry, lines = results[0]
+        _entry, lines = results[0]
         assert lines == [1, 3, 5]
 
     def test_search_no_matches(self, sample_files: Path):
@@ -112,7 +112,7 @@ class TestSearchRegex:
         results = search_regex(entries, r"error|warning")
 
         assert len(results) == 1
-        entry, matches = results[0]
+        _entry, matches = results[0]
         assert len(matches) == 2
         assert matches[0][0] == 1  # Line 1
         assert "error" in matches[0][1]
@@ -127,7 +127,7 @@ class TestSearchRegex:
         results = search_regex(entries, r"user: (\w+)")
 
         assert len(results) == 1
-        entry, matches = results[0]
+        _entry, matches = results[0]
         assert len(matches) == 2
         assert matches[0][1] == ("alice",)
         assert matches[1][1] == ("bob",)
@@ -142,7 +142,7 @@ class TestSearchRegex:
         results = search_regex(entries, r"error", flags=re.IGNORECASE)
 
         assert len(results) == 1
-        entry, matches = results[0]
+        _entry, matches = results[0]
         assert len(matches) == 1
 
 

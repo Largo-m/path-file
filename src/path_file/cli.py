@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import sys
 from pathlib import Path
@@ -23,10 +24,8 @@ def main(argv: list[str] | None = None) -> int:
     for stream in (sys.stdout, sys.stderr):
         reconfigure = getattr(stream, "reconfigure", None)
         if reconfigure is not None:
-            try:
+            with contextlib.suppress(ValueError, OSError):
                 reconfigure(errors="replace")
-            except (ValueError, OSError):
-                pass
 
     parser = _create_parser()
     args = parser.parse_args(argv)
@@ -449,10 +448,7 @@ def _cmd_duplicates(args) -> int:
         chain = chain.recursive(False)
     chain = chain.files()
 
-    if args.by_name:
-        dupes = chain.duplicates_by_name()
-    else:
-        dupes = chain.duplicates_by_hash(args.algorithm)
+    dupes = chain.duplicates_by_name() if args.by_name else chain.duplicates_by_hash(args.algorithm)
 
     if args.json:
         print(json.dumps(dupes, indent=2, default=str))
@@ -467,10 +463,7 @@ def _cmd_duplicates(args) -> int:
 
 def _cmd_archive(args) -> int:
     chain = pf.find(args.path)
-    if args.path.is_file():
-        chain = pf.find(args.path).files()
-    else:
-        chain = chain.files()
+    chain = pf.find(args.path).files() if args.path.is_file() else chain.files()
 
     result = chain.archive_to(args.output, format=args.format).execute()
     print(result.summary())
@@ -498,7 +491,8 @@ def _cmd_watch(args) -> int:
             cmd = cmd_template.replace("{}", str(event.path))
             import subprocess
 
-            subprocess.run(cmd, shell=True)
+            # shell command template is the documented user-facing API
+            subprocess.run(cmd, shell=True)  # noqa: S602  # user-provided shell command API
 
         return callback
 
@@ -557,10 +551,7 @@ def _cmd_rules(args) -> int:
         return 1
 
     chain = pf.find(args.path)
-    if args.apply:
-        chain = chain.dry_run(False)
-    else:
-        chain = chain.dry_run(True)
+    chain = chain.dry_run(False) if args.apply else chain.dry_run(True)
 
     result_chain = rules.apply(chain)
 

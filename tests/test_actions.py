@@ -30,7 +30,7 @@ class TestCopyAction:
         entry = chain.first()
         original_mtime = entry.modified
 
-        result = chain.copy_to(dest, preserve_metadata=True).execute()
+        chain.copy_to(dest, preserve_metadata=True).execute()
 
         copied = dest / entry.name
         assert copied.exists()

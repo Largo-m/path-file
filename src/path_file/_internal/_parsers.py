@@ -23,7 +23,7 @@ def _compile_regex(pattern: str, flags: int = 0) -> Pattern[str]:
     try:
         return re.compile(pattern, flags)
     except re.error as e:
-        raise InvalidPatternError(pattern, f"Invalid regex: {e}")
+        raise InvalidPatternError(pattern, f"Invalid regex: {e}") from e
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ class PatternMatcher:
     def __init__(self, pattern: str, case_sensitive: bool = False) -> None:
         self.pattern = pattern
         self.case_sensitive = case_sensitive
-        self._compiled: Optional[Pattern[str]] = None
+        self._compiled: Pattern[str] | None = None
         self._is_regex = False
         self._parse_pattern()
 
@@ -209,30 +209,26 @@ def make_regex_filter(pattern: str, flags: int = 0) -> Callable[[str], bool]:
 
 
 def make_size_filter(
-    min_size: Optional[int] = None, max_size: Optional[int] = None
+    min_size: int | None = None, max_size: int | None = None
 ) -> Callable[[int], bool]:
     """Create a filter function for size range."""
 
     def _filter(size: int) -> bool:
         if min_size is not None and size < min_size:
             return False
-        if max_size is not None and size > max_size:
-            return False
-        return True
+        return not (max_size is not None and size > max_size)
 
     return _filter
 
 
 def make_time_filter(
-    min_time: Optional[datetime] = None, max_time: Optional[datetime] = None
+    min_time: datetime | None = None, max_time: datetime | None = None
 ) -> Callable[[datetime], bool]:
     """Create a filter function for time range."""
 
     def _filter(dt: datetime) -> bool:
         if min_time is not None and dt < min_time:
             return False
-        if max_time is not None and dt > max_time:
-            return False
-        return True
+        return not (max_time is not None and dt > max_time)
 
     return _filter

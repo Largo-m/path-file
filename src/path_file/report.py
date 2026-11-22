@@ -119,10 +119,6 @@ def format_table(
         else:
             return cell.ljust(width)
 
-    # Header separator
-    sep_parts = ["─" * (w + 2) for w in col_widths]
-    header_sep = "┼".join(sep_parts)
-
     lines = []
     # Top border
     top_parts = ["┌" + "─" * (w + 2) + "┐" for w in col_widths]
@@ -301,10 +297,13 @@ def format_report(report: Report, include_tables: bool = True) -> str:
     lines.append("╠════════════════════════════════════════════════════════════════╣")
 
     lines.append(
-        f"║  Total Entries: {report.chain_size:<6}  Total Size: {human_size(report.total_size):>12}              ║"
+        f"║  Total Entries: {report.chain_size:<6}  Total Size: "
+        f"{human_size(report.total_size):>12}              ║"
     )
     lines.append(
-        f"║  Files: {report.file_count:<6}  Dirs: {report.dir_count:<6}  Symlinks: {report.symlink_count:<6}  Hidden: {report.hidden_count:<6}  Empty: {report.empty_count:<6}  ║"
+        f"║  Files: {report.file_count:<6}  Dirs: {report.dir_count:<6}  "
+        f"Symlinks: {report.symlink_count:<6}  Hidden: {report.hidden_count:<6}  "
+        f"Empty: {report.empty_count:<6}  ║"
     )
 
     if include_tables and report.by_extension:

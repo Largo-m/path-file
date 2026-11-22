@@ -65,7 +65,7 @@ class TestHashFiles:
         hashes = hash_files(entries, "sha256")
 
         assert len(hashes) == 5
-        for path, h in hashes.items():
+        for _path, h in hashes.items():
             assert len(h) == 64
 
     def test_hash_parallel(self, tmp_tree: Path):
@@ -96,7 +96,7 @@ class TestFindDuplicates:
         dupes = find_duplicates(entries, "sha256")
 
         assert len(dupes) == 1
-        hash_val, group = list(dupes.items())[0]
+        _, group = next(iter(dupes.items()))
         assert len(group) == 3
 
     def test_find_no_duplicates(self, tmp_tree: Path):

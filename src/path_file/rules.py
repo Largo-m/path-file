@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import operator
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -110,11 +111,7 @@ class Rule:
             return False
 
         # Check conditions
-        for condition in self.when:
-            if not self._check_condition(entry, condition):
-                return False
-
-        return True
+        return all(self._check_condition(entry, condition) for condition in self.when)
 
     def _check_condition(self, entry: Entry, condition: str) -> bool:
         """Evaluate a single condition string."""
@@ -166,18 +163,18 @@ class Rule:
             return False
 
         # Compare
-        if op == ">":
-            return entry_val > cond_val
-        elif op == "<":
-            return entry_val < cond_val
-        elif op == ">=":
-            return entry_val >= cond_val
-        elif op == "<=":
-            return entry_val <= cond_val
-        elif op == "!=":
-            return entry_val != cond_val
+        comparisons = {
+            ">": operator.gt,
+            "<": operator.lt,
+            ">=": operator.ge,
+            "<=": operator.le,
+            "!=": operator.ne,
+        }
+        compare = comparisons.get(op)
+        if compare is None:
+            return False
 
-        return False
+        return compare(entry_val, cond_val)
 
     def _get_entry_value(self, entry: Entry, key: str) -> Any:
         """Get comparable value from entry."""

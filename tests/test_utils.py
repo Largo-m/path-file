@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 import path_file as pf
-from path_file.utils import *
 
 
 class TestSizeDurationAliases:

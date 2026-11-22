@@ -160,7 +160,7 @@ class FileChain:
         """Return new chain with additional filter."""
         return FileChain(
             self._source,
-            filters=self._filters + [filter_func],
+            filters=[*self._filters, filter_func],
             sort_key=self._sort_key,
             sort_desc=self._sort_desc,
             limit=self._limit,
@@ -202,8 +202,7 @@ class FileChain:
 
     def _iter(self) -> Iterator[Entry]:
         """Internal: yields filtered entries (lazy)."""
-        for entry in self._materialize_iter():
-            yield entry
+        yield from self._materialize_iter()
 
     def _materialize_iter(self) -> Iterator[Entry]:
         """Internal: iterate over filtered entries without collecting all."""
@@ -527,7 +526,7 @@ class FileChain:
 
         return self._with_filter(filter_containing_lines(*texts, encoding=encoding))
 
-    def duplicates_by_hash(self, algorithm: str = "sha256") -> Dict[str, list[Entry]]:
+    def duplicates_by_hash(self, algorithm: str = "sha256") -> dict[str, list[Entry]]:
         """
         Find groups of duplicate entries by content hash.
 
@@ -544,7 +543,7 @@ class FileChain:
 
         return self._with_filter(filter_unique_by_hash())
 
-    def duplicates_by_name(self) -> Dict[str, list[Entry]]:
+    def duplicates_by_name(self) -> dict[str, list[Entry]]:
         """
         Find groups of duplicate entries by file name.
 

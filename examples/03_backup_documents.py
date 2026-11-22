@@ -53,9 +53,8 @@ def main():
 
     mismatches = []
     for rel_path, src_hash in source_hashes.items():
-        if rel_path in backup_hashes:
-            if src_hash != backup_hashes[rel_path]:
-                mismatches.append(rel_path)
+        if rel_path in backup_hashes and src_hash != backup_hashes[rel_path]:
+            mismatches.append(rel_path)
 
     if mismatches:
         print(f"❌ {len(mismatches)} files have hash mismatches!")

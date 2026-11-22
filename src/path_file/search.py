@@ -366,19 +366,21 @@ def search_bytes(
             continue
 
         try:
-            with entry.path.open("rb") as f:
-                # Use mmap for efficient searching
-                with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
-                    offsets = []
-                    start = 0
-                    while True:
-                        pos = mm.find(pattern, start)
-                        if pos == -1:
-                            break
-                        offsets.append(pos)
-                        start = pos + 1
-                    if offsets:
-                        results.append((entry, offsets))
+            # Use mmap for efficient searching
+            with (
+                entry.path.open("rb") as f,
+                mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm,
+            ):
+                offsets = []
+                start = 0
+                while True:
+                    pos = mm.find(pattern, start)
+                    if pos == -1:
+                        break
+                    offsets.append(pos)
+                    start = pos + 1
+                if offsets:
+                    results.append((entry, offsets))
         except (OSError, PermissionError, ValueError) as e:
             log_debug(f"Error searching {entry.path}: {e}")
             continue

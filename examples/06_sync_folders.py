@@ -5,6 +5,8 @@ Example 6: Bidirectional Folder Sync
 Sync two folders bidirectionally with conflict detection.
 """
 
+from pathlib import Path
+
 import path_file as pf
 
 FOLDER_A = pf.expand("~/FolderA")
@@ -33,7 +35,7 @@ def main():
 
     if diff.conflicts:
         print(f"\n⚠️  {len(diff.conflicts)} conflicts detected (newer wins):")
-        for src, dest in diff.conflicts:
+        for src, _dest in diff.conflicts:
             src_rel = src.relative_to(FOLDER_A)
             print(f"   {src_rel}")
 
@@ -56,8 +58,6 @@ def main():
     syncer.dry_run(False).execute()
     print("✅ Sync complete")
 
-
-from pathlib import Path
 
 if __name__ == "__main__":
     main()

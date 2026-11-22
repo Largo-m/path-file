@@ -178,7 +178,7 @@ def find_duplicates(
 
     # Only hash groups with same size
     candidates = []
-    for size, group in by_size.items():
+    for _size, group in by_size.items():
         if len(group) > 1:
             candidates.extend(group)
 
@@ -220,7 +220,8 @@ def find_duplicates_quick(
             partial = hash_file_fast(entry.path, "sha256", sample_size)
             key = (entry.size, partial)
             by_key.setdefault(key, []).append(entry)
-        except Exception:
+        except Exception as e:
+            log_debug(f"Fast hash failed for {entry.path}: {e}")
             continue
 
     return {k: v for k, v in by_key.items() if len(v) > 1}

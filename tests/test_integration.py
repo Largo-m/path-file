@@ -87,7 +87,7 @@ class TestRealWorldScenarios:
         dupes = chain.duplicates_by_hash()
 
         assert len(dupes) == 1
-        hash_val, group = list(dupes.items())[0]
+        _, group = next(iter(dupes.items()))
         assert len(group) == 3
 
         # Generate report
