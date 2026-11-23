@@ -58,12 +58,9 @@ import path_file as pf
 report = pf.find("~/Documents").report()
 print(report.to_table())
 
-# Batch operations with safety
-pf.find("~/Downloads") \
-  .files() \
-  .older_than("30 days") \
-  .delete(dry_run=True) \  # Preview first
-  .execute()
+# Batch operations with safety (preview first)
+result = pf.find("~/Downloads").files().older_than("30 days").delete(dry_run=True).execute()
+print(result.summary())
 
 # Actually delete (requires confirmation)
 pf.find("~/Downloads") \
