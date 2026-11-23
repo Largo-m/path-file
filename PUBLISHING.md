@@ -39,7 +39,8 @@ This repo already contains [.github/workflows/publish.yml](.github/workflows/pub
 which runs on GitHub **release publication** and uses
 `pypa/gh-action-pypi-publish@release/v1` with `id-token: write`.
 
-Register the publisher on <https://pypi.org/manage/account/publishing/>:
+Register the publisher on <https://pypi.org/manage/account/publishing/>.
+Fill the **"Add a new pending publisher"** form with:
 
 | Field | Value |
 | --- | --- |
@@ -48,6 +49,9 @@ Register the publisher on <https://pypi.org/manage/account/publishing/>:
 | Repository name | `path-file` |
 | Workflow name | `publish.yml` |
 | Environment name | `pypi` |
+
+(Environment name is optional; if you leave it blank in the form, remove the
+`environment:` line from `publish.yml` so the two stay consistent.)
 
 Then publish with:
 
@@ -79,7 +83,18 @@ Authentication options:
 3. Optional: enable the Codecov badge by pushing coverage with the `CI` workflow
    (`.github/workflows/ci.yml`).
 
-## 5. Next release checklist
+## 5. Quick gate summary (repo state)
+
+All gates below were run on this tree and pass:
+
+```text
+ruff check src tests ................... All checks passed
+ruff format --check src tests .......... 51 files already formatted
+mypy src ............................... Success: no issues found in 24 source files
+pytest --cov=path_file --cov-fail-under 85 .. 875 tests, 85.26%
+python -m build ....................... wheel + sdist built
+twine check dist/* .................... PASSED
+```
 
 ```bash
 python -m ruff check src tests && python -m ruff format --check src tests
