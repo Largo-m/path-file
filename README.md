@@ -1,181 +1,373 @@
-# PathFile
+# PathFlow
 
-> The elegant file automation library for Python.
+### Elegant, chainable file automation for Python.
 
-[![PyPI](https://img.shields.io/pypi/v/path-file)](https://pypi.org/project/path-file/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/path-file)](https://pypi.org/project/path-file/)
-[![License](https://img.shields.io/pypi/l/path-file)](LICENSE)
-[![CI](https://github.com/Largo-m/path-file/workflows/CI/badge.svg)](https://github.com/Largo-m/path-file/actions)
-[![Coverage](https://codecov.io/gh/Largo-m/path_file/branch/main/graph/badge.svg)](https://codecov.io/gh/Largo-m/path_file)
+**Find, filter, organize, synchronize, and manage files with a clean Python API and a powerful command-line interface.**
+
+[![PyPI Version](https://img.shields.io/pypi/v/pathflow-toolkit?style=for-the-badge&color=7c3aed)](https://pypi.org/project/pathflow-toolkit/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/pathflow-toolkit?style=for-the-badge)](https://pypi.org/project/pathflow-toolkit/)
+[![License](https://img.shields.io/github/license/Largo-m/path-file?style=for-the-badge)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/Largo-m/path-file/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/Largo-m/path-file/actions)
+[![GitHub Stars](https://img.shields.io/github/stars/Largo-m/path-file?style=for-the-badge)](https://github.com/Largo-m/path-file/stargazers)
 
 ---
 
-## Why PathFile?
+## Overview
 
-Python's `pathlib` is great for single-file operations but painful for bulk operations, filtering, searching, and reporting. `shutil` has inconsistent APIs. Users end up writing 50-line scripts for tasks that should be 1 line.
+Python's built-in `pathlib` and `shutil` are excellent tools, but handling complex file operations often requires repetitive code, nested loops, and custom filtering logic.
 
-**PathFile bridges this gap** with a chainable, declarative, dry-run-safe API.
+**PathFlow makes file automation simple.**
+
+It provides a fluent, chainable API that lets you describe what you want to do instead of manually implementing every step.
 
 ```python
-# Before: 30 lines of pathlib + shutil + os.walk
-# After: 1 line with path_file
 import path_file as pf
 
-pf.find("~/Downloads").files().with_extension(".jpg").larger_than("2MB").older_than(
-    "30 days"
-).move_to("~/Pictures/OldLarge").execute()
+pf.find("~/Downloads") \
+    .files() \
+    .with_extension(".jpg") \
+    .larger_than("2MB") \
+    .older_than("30 days") \
+    .move_to("~/Pictures/OldLarge") \
+    .execute()
 ```
+
+One readable pipeline. Multiple file operations. No unnecessary boilerplate.
 
 ## Features
 
-- 🔗 **Chainable API** - Fluent interface for complex operations
-- 🛡️ **Dry-run by default** - Safety first for destructive operations
-- 📦 **Zero dependencies** - Only Python standard library
-- 🎯 **40+ filters** - Size, time, name, path, content, duplicates, permissions
-- ⚡ **19 registered actions** - Copy, move, delete, trash, archive, extract, compress, hash, rename, touch, chmod, read/write, symlink, and more
-- 📊 **Rich reporting** - Tables, JSON, CSV, summary statistics
-- 🔄 **Parallel execution** - Multi-threaded with progress bars
-- 📝 **Declarative rules** - TOML-based automation rules
-- 👀 **Folder watching** - Polling-based file monitoring
-- 🔁 **Directory sync** - Hash-based bidirectional synchronization
-- 🖥️ **Full CLI** - 12 commands for terminal use
-- 🏷️ **Full type hints** - Strict mypy compliance, IDE autocomplete
+| Feature | Description |
+|---|---|
+| Chainable API | Build readable file-processing pipelines |
+| 40+ Filters | Filter by name, extension, size, date, content, permissions, and more |
+| Safe Operations | Preview destructive operations with dry-run support |
+| Parallel Execution | Run supported operations using multiple workers |
+| Duplicate Detection | Identify duplicate files using hashes and names |
+| Rich Reporting | Generate readable tables and structured reports |
+| Directory Sync | Synchronize directories with hash-based verification |
+| Folder Watching | Monitor directories for filesystem changes |
+| Rules Engine | Define reusable automation rules using TOML |
+| Archive Management | Create and extract archives |
+| Full CLI | Use PathFlow directly from your terminal |
+| Type Hints | Better IDE support and static type checking |
+
+### Designed for practical automation
+
+- **Readable:** Express complex operations through simple method chains.
+- **Predictable:** Preview operations before making destructive changes.
+- **Lightweight:** Core functionality uses the Python standard library.
+- **Extensible:** Optional integrations are available when needed.
+- **Developer-friendly:** Type hints, structured output, and a dedicated CLI.
+
+---
 
 ## Installation
 
+Requires **Python 3.10 or newer**.
+
+Install the latest published version:
+
 ```bash
-pip install path-file
+pip install pathflow-toolkit
 ```
 
-Requires **Python 3.10+**
+Or install a specific version:
+
+```bash
+pip install pathflow-toolkit==0.1.2
+```
+
+Optional trash support:
+
+```bash
+pip install "pathflow-toolkit[trash]"
+```
 
 ## Quick Start
+
+### 1. Find files
 
 ```python
 import path_file as pf
 
-# Find and report
+results = pf.find("~/Documents").files()
+
+print("Found files:", results.count())
+```
+
+### 2. Filter files
+
+```python
+results = (
+    pf.find("~/Downloads")
+    .files()
+    .with_extension(".pdf")
+    .larger_than("1MB")
+    .older_than("30 days")
+)
+
+print(results.to_table())
+```
+
+### 3. Generate a report
+
+```python
 report = pf.find("~/Documents").report()
+
 print(report.to_table())
+```
 
-# Batch operations with safety (preview first)
-result = pf.find("~/Downloads").files().older_than("30 days").delete(dry_run=True).execute()
+### 4. Preview file operations
+
+PathFlow supports dry-run workflows so you can inspect an operation before applying it.
+
+```python
+result = (
+    pf.find("~/Downloads")
+    .files()
+    .older_than("30 days")
+    .delete(dry_run=True)
+    .execute()
+)
+
 print(result.summary())
+```
 
-# Actually delete (requires confirmation)
+### 5. Execute an operation
+
+After reviewing the preview, execute the operation with the required confirmation:
+
+```python
 pf.find("~/Downloads") \
-  .files() \
-  .older_than("30 days") \
-  .delete(confirm=True) \
-  .execute()
+    .files() \
+    .older_than("30 days") \
+    .delete(confirm=True) \
+    .execute()
+```
 
-# Organize photos by date
-pf.find("~/Photos") \
-  .files() \
-  .with_extensions(".jpg", ".png", ".heic") \
-  .for_each(lambda e: e.path.rename(f"~/Photos/Organized/{e.modified:%Y/%m}/{e.name}"))
+### 6. Synchronize directories
 
-# Sync with verification
+```python
 syncer = pf.sync("~/Documents", "/backup/Documents")
-syncer.direction("source_to_dest").delete_extras(True).progress()
+
+syncer.direction("source_to_dest")
+syncer.delete_extras(True)
+syncer.progress()
+
 diff = syncer.compare()
+print(diff)
+
 syncer.execute()
+```
 
-# Declarative rules
+### 7. Use declarative rules
+
+```python
 rules = pf.Rules.from_file("cleanup.toml")
-rules.apply(pf.find("~/Downloads").files())
+
+rules.apply(
+    pf.find("~/Downloads").files()
+)
 ```
-
-## Documentation
-
-- [Publishing / PyPI release checklist](PUBLISHING.md)
-
-- [Quick Start](docs/quickstart.md)
-- [API Reference](docs/api.md)
-- [Recipes](docs/recipes.md)
-- [Rules Engine](docs/rules.md)
-- [CLI Reference](docs/cli.md)
-
-## CLI Usage
-
-```bash
-# Find files
-path-file find ~/Downloads --ext .jpg --larger 2MB
-
-# Generate report
-path-file report ~/Documents --json
-
-# Copy with progress
-path-file copy ~/Photos /backup/Photos --ext .jpg --parallel 4
-
-# Safe delete (requires --confirm)
-path-file delete ~/Temp --ext .tmp --confirm
-
-# Sync directories
-path-file sync ~/Documents /backup/Documents --delete-extras --dry-run
-
-# Find duplicates
-path-file duplicates ~/Photos
-
-# Archive
-path-file archive ~/Projects -o backup.zip
-
-# Watch folder
-path-file watch ~/Downloads --filter "*.pdf" --on-new "notify.sh {}"
-
-# Apply rules
-path-file rules ~/Downloads -f cleanup.toml --apply
-```
-
-## Comparison
-
-| Feature | pathlib | shutil | path_file |
-|---------|---------|--------|----------|
-| Chainable API | ❌ | ❌ | ✅ |
-| Bulk filtering | Manual | Limited | ✅ 40+ filters |
-| Dry-run safety | Manual | ❌ | ✅ Default |
-| Progress bars | ❌ | ❌ | ✅ Built-in |
-| Parallel execution | Manual | ❌ | ✅ Built-in |
-| Content search | Manual | ❌ | ✅ Text & regex |
-| Duplicate detection | Manual | ❌ | ✅ By hash/name |
-| Declarative rules | ❌ | ❌ | ✅ TOML |
-| Folder watching | ❌ | ❌ | ✅ Polling |
-| Directory sync | ❌ | Manual | ✅ Hash-based |
-| CLI | ❌ | ❌ | ✅ 12 commands |
-| Zero dependencies | ✅ | ✅ | ✅ |
-| Type hints | ✅ | Partial | ✅ Strict |
-
-## Examples
-
-See [examples/](examples/) for 10 real-world scripts:
-
-1. `01_clean_downloads.py` - Clean old downloads
-2. `02_organize_photos.py` - Organize photos by date
-3. `03_backup_documents.py` - Backup with hash verification
-4. `04_find_duplicates.py` - Find and report duplicates
-5. `05_watch_and_sort.py` - Auto-sort downloads
-6. `06_sync_folders.py` - Bidirectional sync
-7. `07_rules_declarative.py` - Rules-based cleanup
-8. `08_compress_old_files.py` - Compress old files
-9. `09_rename_batch.py` - Batch rename photos
-10. `10_report_audit.py` - Generate audit reports
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-## Security
-
-See [SECURITY.md](SECURITY.md) for security policy and vulnerability reporting.
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ---
 
-Made with ❤️ by [Largo-m](https://github.com/Largo-m)
+## Command Line Interface
+
+PathFlow includes a CLI for common file automation tasks.
+
+### Find files
+
+```bash
+pathflow find ~/Downloads --ext .jpg --larger 2MB
+```
+
+### Generate reports
+
+```bash
+pathflow report ~/Documents --json
+```
+
+### Copy files
+
+```bash
+pathflow copy ~/Photos /backup/Photos --ext .jpg --parallel 4
+```
+
+### Delete files safely
+
+```bash
+pathflow delete ~/Temp --ext .tmp --confirm
+```
+
+### Synchronize directories
+
+```bash
+pathflow sync ~/Documents /backup/Documents --delete-extras --dry-run
+```
+
+### Find duplicates
+
+```bash
+pathflow duplicates ~/Photos
+```
+
+### Create archives
+
+```bash
+pathflow archive ~/Projects -o backup.zip
+```
+
+### Watch directories
+
+```bash
+pathflow watch ~/Downloads --filter "*.pdf" --on-new "notify.sh {}"
+```
+
+### Apply automation rules
+
+```bash
+pathflow rules ~/Downloads -f cleanup.toml --apply
+```
+
+For all available commands and options:
+
+```bash
+pathflow --help
+```
+
+---
+
+## PathFlow vs. Standard Library
+
+| Capability | pathlib | shutil | PathFlow |
+|---|:---:|:---:|:---:|
+| Chainable operations | — | — | Yes |
+| Bulk file filtering | Manual | Limited | Yes |
+| Dry-run workflows | Manual | — | Yes |
+| Duplicate detection | Manual | — | Yes |
+| Progress reporting | Manual | — | Yes |
+| Parallel execution | Manual | — | Yes |
+| Content search | Manual | — | Yes |
+| Declarative rules | — | — | Yes |
+| Directory synchronization | — | Limited | Yes |
+| Command-line interface | — | — | Yes |
+| Type hints | Yes | Partial | Yes |
+
+---
+
+## Documentation
+
+Explore the project documentation:
+
+| Resource | Description |
+|---|---|
+| [Quick Start](docs/quickstart.md) | Get started with PathFlow |
+| [API Reference](docs/api.md) | Explore the Python API |
+| [CLI Reference](docs/cli.md) | Learn all CLI commands |
+| [Recipes](docs/recipes.md) | Practical automation examples |
+| [Rules Engine](docs/rules.md) | Build TOML-based workflows |
+| [Publishing Guide](PUBLISHING.md) | Package and release instructions |
+| [Changelog](CHANGELOG.md) | Version history |
+
+## Examples
+
+The [`examples/`](examples/) directory contains practical scripts covering:
+
+1. Cleaning old downloads
+2. Organizing photos
+3. Backing up documents
+4. Finding duplicate files
+5. Watching and sorting directories
+6. Synchronizing folders
+7. Declarative cleanup rules
+8. Compressing old files
+9. Batch renaming
+10. Generating audit reports
+
+---
+
+## Development
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Largo-m/path-file.git
+cd path-file
+```
+
+Create a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Activate it on Linux or macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+Install development dependencies:
+
+```bash
+pip install -e ".[dev]"
+```
+
+Run tests:
+
+```bash
+pytest
+```
+
+Run tests with coverage:
+
+```bash
+pytest --cov=path_file --cov-report=term-missing
+```
+
+Run linting:
+
+```bash
+ruff check .
+```
+
+Run type checking:
+
+```bash
+mypy src/path_file
+```
+
+## Contributing
+
+Contributions, bug reports, feature suggestions, and improvements are welcome.
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
+
+## Security
+
+If you discover a security vulnerability, please follow the instructions in [SECURITY.md](SECURITY.md).
+
+## License
+
+PathFlow is released under the **MIT License**. See [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**PathFlow**
+
+*Less boilerplate. More automation.*
+
+Created and maintained by [Largo-m](https://github.com/Largo-m).
+
+[GitHub Repository](https://github.com/Largo-m/path-file) · [PyPI Package](https://pypi.org/project/pathflow-toolkit/)
+
+</div>

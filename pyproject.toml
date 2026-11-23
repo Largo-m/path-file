@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "path-file"
-version = "0.1.0"
+name = "pathflow-toolkit"
+version = "0.1.2"
 description = "The elegant file automation library for Python"
 readme = "README.md"
 license = {text = "MIT"}
@@ -40,14 +40,14 @@ dev = [
 ]
 
 [project.scripts]
-path-file = "path_file.cli:main"
+pathflow = "path_file.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Largo-m/path_file"
-Documentation = "https://github.com/Largo-m/path_file#readme"
-Repository = "https://github.com/Largo-m/path_file"
-Issues = "https://github.com/Largo-m/path_file/issues"
-Changelog = "https://github.com/Largo-m/path_file/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Largo-m/path-file"
+Documentation = "https://github.com/Largo-m/path-file#readme"
+Repository = "https://github.com/Largo-m/path-file"
+Issues = "https://github.com/Largo-m/path-file/issues"
+Changelog = "https://github.com/Largo-m/path-file/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/path_file"]
@@ -100,3 +100,4 @@ exclude_lines = [
     "raise NotImplementedError",
     "@overload",
 ]
+
