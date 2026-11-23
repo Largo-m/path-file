@@ -88,6 +88,8 @@ rules.apply(pf.find("~/Downloads").files())
 
 ## Documentation
 
+- [Publishing / PyPI release checklist](PUBLISHING.md)
+
 - [Quick Start](docs/quickstart.md)
 - [API Reference](docs/api.md)
 - [Recipes](docs/recipes.md)
