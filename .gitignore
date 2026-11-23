@@ -151,3 +151,8 @@ build/
 *.egg-info/
 .ruff_cache/
 .acl-diagnose/
+# Local dev reports
+.collect.txt
+.cov_report.txt
+.final_run.txt
+*.zip
