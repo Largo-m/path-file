@@ -90,7 +90,7 @@ class PatternMatcher:
         import fnmatch
 
         if self.case_sensitive:
-            return fnmatch.fnmatch(text, self.pattern) or fnmatch.fnmatch(
+            return fnmatch.fnmatchcase(text, self.pattern) or fnmatch.fnmatchcase(
                 Path(text).name, self.pattern
             )
         else:

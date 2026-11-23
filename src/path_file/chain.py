@@ -98,6 +98,15 @@ def _dedupe_entries(entries: list[Entry]) -> list[Entry]:
 # ──────────────────────────────────────────────────────────────────────────────
 
 
+class _DedupFilter:
+    """Marker filter: the real dedup happens in FileChain._materialize()."""
+
+    _needs_dedup: bool = True
+
+    def __call__(self, entry: Entry) -> bool:
+        return True
+
+
 class FileChain:
     """
     Immutable, lazy, chainable file collection.
@@ -264,7 +273,8 @@ class FileChain:
             # Walk directory
             config = WalkConfig(
                 follow_symlinks=self._follow_symlinks,
-                max_depth=self._max_depth,
+                # recursive=False means root level only (depth 0)
+                max_depth=self._max_depth if self._recursive else 0,
                 min_depth=self._min_depth,
             )
             raw_entries: Iterator[Entry] | list[Entry] = walk(self._source, config=config)
@@ -470,10 +480,27 @@ class FileChain:
         return self._with_filter(filter_created_this_week())
 
     def name_matches(self, pattern: str) -> FileChain:
-        """Name matches regex pattern."""
+        """Name matches glob pattern."""
         from path_file.filters import filter_name_matches
 
         return self._with_filter(filter_name_matches(pattern))
+
+    def name_matches_regex(self, pattern: str) -> FileChain:
+        """Name matches a regular expression pattern."""
+        import re as _re
+
+        compiled = _re.compile(pattern)
+
+        def _filter(entry: Entry) -> bool:
+            return bool(compiled.search(entry.name))
+
+        return self._with_filter(_filter)
+
+    def glob(self, pattern: str, case_sensitive: bool = False) -> FileChain:
+        """Name/path matches a glob pattern."""
+        from path_file.filters import filter_glob
+
+        return self._with_filter(filter_glob(pattern, case_sensitive))
 
     def name_contains(self, text: str, case_sensitive: bool = False) -> FileChain:
         """Name contains text."""
@@ -660,12 +687,7 @@ class FileChain:
 
     def deduplicate(self) -> FileChain:
         """Remove duplicate entries by resolved path (keeps first occurrence)."""
-
-        def _dedup_filter(entry: Entry) -> bool:
-            return True  # marker only; real dedup happens in _materialize()
-
-        _dedup_filter._needs_dedup = True
-        return self._with_filter(_dedup_filter)
+        return self._with_filter(_DedupFilter())
 
     # ─── Execution Modifiers (MODULE 3) ───────────────────────────────────────
 
@@ -864,7 +886,8 @@ class FileChain:
     # ─── Iterator Protocol ────────────────────────────────────────────────────
 
     def __iter__(self) -> Iterator[Entry]:
-        return self._iter()
+        # Full pipeline: filters, context filters, dedupe, sort, skip/limit
+        return iter(self._materialize())
 
     def __len__(self) -> int:
         return self.count()

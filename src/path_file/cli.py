@@ -335,10 +335,10 @@ def _build_chain(args: argparse.Namespace) -> pf.FileChain:
         chain = chain.name_contains(args.name)
 
     if getattr(args, "pattern", None):
-        chain = chain.name_matches(args.pattern)
+        chain = chain.glob(args.pattern)
 
     if getattr(args, "regex", None):
-        chain = chain.name_matches(args.regex)
+        chain = chain.name_matches_regex(args.regex)
 
     if getattr(args, "larger", None):
         chain = chain.larger_than(args.larger)
@@ -409,7 +409,7 @@ def _cmd_copy(args: argparse.Namespace) -> int:
 
 
 def _cmd_move(args: argparse.Namespace) -> int:
-    chain = _build_chain(args)
+    chain = _build_chain(args).dry_run(args.dry_run)
     result = chain.move_to(args.dest, overwrite=args.overwrite).execute()
     print(result.summary())
     return 0 if result.success() else 1
@@ -469,8 +469,7 @@ def _cmd_duplicates(args: argparse.Namespace) -> int:
 
 
 def _cmd_archive(args: argparse.Namespace) -> int:
-    chain = pf.find(args.path)
-    chain = pf.find(args.path).files() if args.path.is_file() else chain.files()
+    chain = _build_chain(args).files()
 
     result = chain.archive_to(args.output, format=args.format).execute()
     print(result.summary())
@@ -478,6 +477,8 @@ def _cmd_archive(args: argparse.Namespace) -> int:
 
 
 def _cmd_extract(args: argparse.Namespace) -> int:
+    if not args.archive.is_file():
+        raise PathflowError(f"Archive not found: {args.archive}")
     chain = pf.find(args.archive).files()
     result = chain.extract_to(args.output).execute()
     print(result.summary())
@@ -545,7 +546,10 @@ def _cmd_sync(args: argparse.Namespace) -> int:
         return 0 if diff.has_changes() else 4
     else:
         result = syncer.execute()
-        print(result.summary())
+        if args.json:
+            print(json.dumps(result.to_dict(), indent=2, default=str))
+        else:
+            print(result.summary())
         return 0 if result.success() else 1
 
 
@@ -563,8 +567,13 @@ def _cmd_rules(args: argparse.Namespace) -> int:
     result_chain = rules.apply(chain)
 
     if args.apply:
-        # Execute pending actions
-        print("Rules applied.")
+        results = rules.run(chain, dry_run=False)
+        executed = sum(1 for r in results if r.get("status") == "executed")
+        rule_errors = [r for r in results if r.get("status") == "error"]
+        print(f"Rules applied: {executed} file(s) affected.")
+        for r in rule_errors:
+            print(f"  Error on {r['entry'].name}: {r['error']}", file=sys.stderr)
+        return 0 if not rule_errors else 1
     else:
         print(rules.explain())
         print(f"\nDry run: {result_chain.count()} files would be affected")

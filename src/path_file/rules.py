@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import operator
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from path_file._internal._log import log_debug
 from path_file.chain import FileChain
 from path_file.entries import Entry
+from path_file.exceptions import PathflowError
 from path_file.units import parse_duration, parse_size
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -103,6 +105,19 @@ class Rule:
     confirm: bool = False
     dry_run: bool = True  # Safe by default
 
+    def to_dict(self) -> dict[str, Any]:
+        """Convert rule to a plain dictionary."""
+        return {
+            "match": self.match,
+            "when": list(self.when),
+            "action": self.action,
+            "dest": self.dest,
+            "pattern": self.pattern,
+            "overwrite": self.overwrite,
+            "confirm": self.confirm,
+            "dry_run": self.dry_run,
+        }
+
     def matches(self, entry: Entry) -> bool:
         """Check if entry matches this rule's conditions."""
         # Check glob pattern
@@ -125,6 +140,20 @@ class Rule:
             key = key.strip()
             value = value.strip().strip("\"'")
             return self._check_equality(entry, key, value)
+
+        # Shorthand conditions from from_string/from_dict:
+        #   'when_larger_than: 50MB' -> 'size > 50MB'
+        #   'when_older_than: 7 days' -> 'age > 7 days'
+        when_map = {
+            "when_larger_than": ("size", ">"),
+            "when_smaller_than": ("size", "<"),
+            "when_older_than": ("age", ">"),
+            "when_newer_than": ("age", "<"),
+        }
+        for prefix, (key, op) in when_map.items():
+            if condition.startswith(prefix):
+                rest = condition[len(prefix) :].lstrip(": ")
+                return self._check_comparison(entry, key, op, rest)
 
         # Parse comparison
         for op in [">=", "<=", ">", "<", "!="]:
@@ -212,6 +241,12 @@ class Rules:
 
     def __init__(self, rules: list[Rule]) -> None:
         self.rules = rules
+
+    def __len__(self) -> int:
+        return len(self.rules)
+
+    def __iter__(self) -> Iterator[Rule]:
+        return iter(self.rules)
 
     @classmethod
     def from_file(cls, path: str | Path) -> Rules:
@@ -310,9 +345,25 @@ class Rules:
 
         return FileChain.from_entries(matched_entries)
 
+    def run(self, chain: FileChain, dry_run: bool | None = None) -> list[dict[str, Any]]:
+        """Execute every matching rule against the chain entries (real execution)."""
+        results: list[dict[str, Any]] = []
+        for entry in chain:
+            for rule in self.rules:
+                if rule.matches(entry):
+                    results.append(
+                        _execute_rule_action(
+                            entry, rule, dry_run if dry_run is not None else rule.dry_run
+                        )
+                    )
+                    break  # first matching rule wins
+        return results
+
     def validate(self) -> list[str]:
         """Validate rules and return list of errors."""
         errors = []
+        if not self.rules:
+            errors.append("No rules defined")
         for i, rule in enumerate(self.rules):
             # Check action is valid
             valid_actions = {
@@ -384,12 +435,47 @@ def execute_rules(chain: FileChain, rules: Rules, dry_run: bool | None = None) -
 
 
 def _execute_rule_action(entry: Entry, rule: Rule, dry_run: bool) -> dict[str, Any]:
-    """Execute a single rule action on an entry."""
-    # This would integrate with actions.py
-    # Placeholder for now
-    return {
+    """Execute a single rule action on an entry (real execution)."""
+    base = {
         "entry": entry,
         "action": rule.action,
         "dry_run": dry_run,
-        "status": "would_execute" if dry_run else "executed",
     }
+    if not rule.action or rule.action == "none":
+        base["status"] = "skipped"
+        base["result"] = None
+        return base
+
+    # Relative dest resolves against the matched file's directory
+    dest: str | Path | None = rule.dest
+    if dest is not None and rule.action in ("move", "copy", "archive"):
+        dest_path = Path(dest)
+        if not dest_path.is_absolute():
+            dest = entry.path.parent / dest_path
+
+    try:
+        chain = FileChain.from_paths([entry.path]).dry_run(dry_run)
+        if rule.action == "delete":
+            chain = chain.delete(confirm=rule.confirm)
+        elif rule.action == "trash":
+            chain = chain.trash(confirm=rule.confirm)
+        elif rule.action == "move":
+            chain = chain.move_to(dest, overwrite=rule.overwrite)
+        elif rule.action == "copy":
+            chain = chain.copy_to(dest, overwrite=rule.overwrite)
+        elif rule.action == "archive":
+            chain = chain.archive_to(dest)
+        elif rule.action == "compress":
+            chain = chain.compress()
+        elif rule.action == "rename":
+            chain = chain.rename(rule.pattern)
+        else:
+            raise PathflowError(f"Unknown rule action: {rule.action}")
+        result = chain.execute()
+        base["status"] = "executed"
+        base["result"] = result
+    except Exception as exc:  # one bad rule must not kill the batch
+        log_debug(f"rule action failed for {entry.path}: {exc}")
+        base["status"] = "error"
+        base["error"] = str(exc)
+    return base

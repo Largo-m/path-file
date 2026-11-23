@@ -32,7 +32,7 @@ pf.find("~/Downloads").files().with_extension(".jpg").larger_than("2MB").older_t
 - 🛡️ **Dry-run by default** - Safety first for destructive operations
 - 📦 **Zero dependencies** - Only Python standard library
 - 🎯 **40+ filters** - Size, time, name, path, content, duplicates, permissions
-- ⚡ **20+ actions** - Copy, move, delete, archive, compress, hash, rename, sync
+- ⚡ **19 registered actions** - Copy, move, delete, trash, archive, extract, compress, hash, rename, touch, chmod, read/write, symlink, and more
 - 📊 **Rich reporting** - Tables, JSON, CSV, summary statistics
 - 🔄 **Parallel execution** - Multi-threaded with progress bars
 - 📝 **Declarative rules** - TOML-based automation rules

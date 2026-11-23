@@ -132,6 +132,13 @@ def _process_entry(
         if tracker and not tracker.visit(path):
             # Cycle detected
             return
+        # Yield the symlink entry itself before following it
+        if depth >= config.min_depth:
+            try:
+                yield Entry.from_stat(path, entry.stat(follow_symlinks=False))
+            except (OSError, PermissionError):
+                with contextlib.suppress(OSError, PermissionError):
+                    yield Entry.from_path(path)
         # Follow the symlink - recurse if it's a directory
         if entry.is_dir(follow_symlinks=True):
             yield from walk_recursive(path, config, depth + 1, tracker)

@@ -82,6 +82,21 @@ def execute_action(chain: FileChain) -> ActionResult:
     # Get entries to process
     entries = chain._materialize()
     if not entries:
+        # create_dir/touch are useful on paths that do not exist yet
+        if action_name in ("create_dir", "touch", "symlink_to") and not chain._dry_run:
+            root = chain._source
+            if isinstance(root, (str, Path)) and not Path(root).exists():
+                target = Path(root)
+                if action_name == "create_dir":
+                    target.mkdir(parents=True, exist_ok=True)
+                    return ActionResult(action=action_name, count=1)
+                if action_name == "touch":
+                    target.touch()
+                    return ActionResult(action=action_name, count=1)
+                link_target = pos_args[0] if pos_args else params.get("target")
+                if link_target is not None:
+                    target.symlink_to(Path(link_target))
+                    return ActionResult(action=action_name, count=1)
         log_info(f"No files to {action_name}")
         return ActionResult(action=action_name, count=0, dry_run=chain._dry_run or False)
 
