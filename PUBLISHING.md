@@ -33,7 +33,33 @@ python -c "import path_file; print(path_file.__version__)"
 path-file --help
 ```
 
-## 2. Production PyPI
+## 2. Trusted Publishing (no passwords — recommended)
+
+This repo already contains [.github/workflows/publish.yml](.github/workflows/publish.yml),
+which runs on GitHub **release publication** and uses
+`pypa/gh-action-pypi-publish@release/v1` with `id-token: write`.
+
+Register the publisher on <https://pypi.org/manage/account/publishing/>:
+
+| Field | Value |
+| --- | --- |
+| PyPI Project Name | `path-file` |
+| Owner | `Largo-m` |
+| Repository name | `path-file` |
+| Workflow name | `publish.yml` |
+| Environment name | `pypi` |
+
+Then publish with:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+gh release create v0.1.0 --title "PathFile 0.1.0" --notes-from CHANGELOG.md
+```
+
+The workflow builds, `twine check`s, and uploads the wheel + sdist itself.
+
+## 3. Production PyPI (manual, alternative)
 
 ```bash
 python -m twine upload dist/*
@@ -45,7 +71,7 @@ Authentication options:
   then use username `__token__` and the token as password.
 - Or set `TWINE_USERNAME` / `TWINE_PASSWORD` environment variables.
 
-## 3. After publishing
+## 4. After publishing
 
 1. Create a GitHub release at <https://github.com/Largo-m/path-file/releases/new>
    with tag `v0.1.0` and the [CHANGELOG.md](CHANGELOG.md) 0.1.0 section.
@@ -53,7 +79,7 @@ Authentication options:
 3. Optional: enable the Codecov badge by pushing coverage with the `CI` workflow
    (`.github/workflows/ci.yml`).
 
-## 4. Next release checklist
+## 5. Next release checklist
 
 ```bash
 python -m ruff check src tests && python -m ruff format --check src tests
