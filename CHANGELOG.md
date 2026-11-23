@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Utilities**: 30+ helper functions for common file operations
 - **Zero Dependencies**: Only Python standard library
 - **Full Type Hints**: Strict mypy compliance
-- **Comprehensive Tests**: 26 test files, 875 tests, 85% line coverage
+- **Comprehensive Tests**: 26 test files, 875 tests, 85% line coverage (verified)
 - **Release-Gated Quality**: ruff check + ruff format --check + mypy strict + pytest --cov-fail-under=85 + twine check, all passing
 - **Documentation**: API reference, quickstart, recipes, rules, CLI guide
 
