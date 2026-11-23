@@ -4,13 +4,6 @@
 
 **Find, filter, organize, synchronize, and manage files with a clean Python API and a powerful command-line interface.**
 
-[![PyPI Version](https://img.shields.io/pypi/v/pathflow-toolkit?style=for-the-badge&color=7c3aed)](https://pypi.org/project/pathflow-toolkit/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/pathflow-toolkit?style=for-the-badge)](https://pypi.org/project/pathflow-toolkit/)
-[![License](https://img.shields.io/github/license/Largo-m/path-file?style=for-the-badge)](LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/Largo-m/path-file/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/Largo-m/path-file/actions)
-[![GitHub Stars](https://img.shields.io/github/stars/Largo-m/path-file?style=for-the-badge)](https://github.com/Largo-m/path-file/stargazers)
-
----
 
 ## Overview
 
